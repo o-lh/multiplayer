@@ -18,7 +18,7 @@ io.on('connection', (socket) => {
     console.log('Someone joined :D');
 
     socket.on('chat message', (message) => {
-        console.log(message);
+        io.emit('chat message', message)
     })
 
     socket.on('disconnect', () => {
@@ -29,5 +29,3 @@ io.on('connection', (socket) => {
 server.listen(1338, () => {
     console.log('Listening on port 1338 (change back to 1337 later)');
 });
-
-// https://socket.io/docs/v4/tutorial/step-3
