@@ -26,6 +26,6 @@ io.on('connection', (socket) => {
     })
 })
 
-server.listen(1338, () => {
-    console.log('Listening on port 1338 (change back to 1337 later)');
+server.listen(1337, () => {
+    console.log('Listening on port 1337');
 });
