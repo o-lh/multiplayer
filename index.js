@@ -15,11 +15,19 @@ app.use(favicon(path.join(path.dirname(fileURLToPath(import.meta.url)), 'public'
 app.use(express.static('public'));
 
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    console.log('Someone joined :D');
+
+    socket.on('chat message', (message) => {
+        console.log(message);
+    })
+
+    socket.on('disconnect', () => {
+        console.log('Someone left   :(');
+    })
 })
 
-server.listen(1337, () => {
-    console.log('Listening on port 1337');
+server.listen(1338, () => {
+    console.log('Listening on port 1338 (change back to 1337 later)');
 });
 
 // https://socket.io/docs/v4/tutorial/step-3
