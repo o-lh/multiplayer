@@ -1,4 +1,4 @@
-import path from 'node:path';
+import { dirname, join } from 'node:path';
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 
@@ -11,7 +11,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
-app.use(favicon(path.join(path.dirname(fileURLToPath(import.meta.url)), 'public', 'favicon.ico')));
+app.use(favicon(join(dirname(fileURLToPath(import.meta.url)), 'public', 'favicon.ico')));
 app.use(express.static('public'));
 
 io.on('connection', (socket) => {
