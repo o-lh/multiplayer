@@ -15,14 +15,10 @@ app.use(favicon(join(dirname(fileURLToPath(import.meta.url)), 'public', 'favicon
 app.use(express.static('public'));
 
 io.on('connection', (socket) => {
-    console.log('Someone joined :D');
-
-    socket.on('chat message', (message) => {
-        io.emit('chat message', message)
-    })
+    console.log('Someone connected');
 
     socket.on('disconnect', () => {
-        console.log('Someone left   :(');
+        console.log('Someone disconnected');
     })
 })
 
