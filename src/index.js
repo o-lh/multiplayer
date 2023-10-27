@@ -7,12 +7,14 @@ import favicon from 'serve-favicon';
 
 import { Server } from 'socket.io';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
-app.use(favicon(join(dirname(fileURLToPath(import.meta.url)), 'public', 'favicon.ico')));
-app.use(express.static('public'));
+app.use(favicon(join(__dirname, 'public', 'favicon.ico')));
+app.use(express.static(join(__dirname, 'public')));
 
 io.on('connection', (socket) => {
     console.log('Someone connected');
