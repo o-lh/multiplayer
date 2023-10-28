@@ -52,10 +52,10 @@ addEventListener('keyup', event => {
     }
 });
 
-let playerPositionX = canvas.width / 2;
-let playerPositionY = canvas.height / 2;
 const PLAYER_SPEED = 200;
 const PLAYER_SIZE = 25;
+let playerPositionX = Math.random() * canvas.width;
+let playerPositionY = Math.random() * canvas.height;
 
 let prev = 0;
 let deltaTime = 0;
@@ -68,6 +68,15 @@ function tick(t) {
     if (holdD) playerPositionX += PLAYER_SPEED * deltaTime;
     if (holdS) playerPositionY += PLAYER_SPEED * deltaTime;
     if (holdA) playerPositionX -= PLAYER_SPEED * deltaTime;
+
+    if (playerPositionY - PLAYER_SIZE / 2 < 0)
+        playerPositionY = 0 + PLAYER_SIZE / 2;
+    if (playerPositionX + PLAYER_SIZE / 2 > canvas.width)
+        playerPositionX = canvas.width - PLAYER_SIZE / 2;
+    if (playerPositionY + PLAYER_SIZE / 2 > canvas.height)
+        playerPositionY = canvas.height - PLAYER_SIZE / 2;
+    if (playerPositionX - PLAYER_SIZE / 2 < 0)
+        playerPositionX = 0 + PLAYER_SIZE / 2;
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
