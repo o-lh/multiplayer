@@ -4,12 +4,12 @@ const canvas = document.getElementById('canvas');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-window.onresize = () => {
+onresize = () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 };
 
-window.addEventListener('keydown', event => {
+addEventListener('keydown', event => {
     if (!event.repeat) {
         switch (event.code) {
             case 'KeyW': console.log('W pressed'); break;
@@ -20,7 +20,7 @@ window.addEventListener('keydown', event => {
     }
 });
 
-window.addEventListener('keyup', event => {
+addEventListener('keyup', event => {
     switch (event.code) {
         case 'KeyW': console.log('W released'); break;
         case 'KeyA': console.log('A released'); break;
