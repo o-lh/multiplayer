@@ -2,12 +2,14 @@ const socket = io();
 
 const canvas = document.getElementById('canvas');
 const context = canvas.getContext('2d');
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+let smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
+canvas.width = smallerDimension;
+canvas.height = smallerDimension;
 
 onresize = () => {
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
+    smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
+    canvas.width = smallerDimension;
+    canvas.height = smallerDimension;
 };
 
 let holdW = false;
@@ -114,7 +116,7 @@ function tick(t) {
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (player of otherPlayers) {
+    for (const player of otherPlayers) {
         if (player.posX === null) continue;
 
         context.fillStyle = PLAYER_COLOURS[player.colourIndex];
