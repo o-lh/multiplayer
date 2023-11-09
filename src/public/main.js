@@ -1,15 +1,42 @@
 const socket = io();
 
+class Point {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+const CANVAS_WORLD_SPACE_WIDTH = 10;
+const CANVAS_WORLD_SPACE_HEIGHT = 10;
+
+function toScreenSpacePoint(worldSpacePoint) {
+    return new Point(
+        canvas.width / 2 + worldSpacePoint.x * canvas.width / (2 * CANVAS_WORLD_SPACE_WIDTH),
+        canvas.height / 2 + worldSpacePoint.y * canvas.height / (2 * CANVAS_WORLD_SPACE_HEIGHT)
+    );
+}
+
+// TODO: What about for a non-square canvas?
+function toScreenSpaceLength(worldSpaceLength) {
+    return worldSpaceLength * canvas.height / (2 * CANVAS_WORLD_SPACE_HEIGHT);
+}
+
 const canvas = document.getElementById('canvas');
 const context = canvas.getContext('2d');
 let smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
 canvas.width = smallerDimension;
 canvas.height = smallerDimension;
 
+const PLAYER_SIZE = 0.5;
+let playerSizeScreenSpace = toScreenSpaceLength(PLAYER_SIZE);
+
 onresize = () => {
     smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
     canvas.width = smallerDimension;
     canvas.height = smallerDimension;
+
+    playerSizeScreenSpace = toScreenSpaceLength(PLAYER_SIZE);
 };
 
 let holdW = false;
@@ -77,12 +104,11 @@ socket.on('player_disconnected', (id) => {
     otherPlayers.splice(index, 1);
 });
 
-const PLAYER_SPEED = 200;
-const PLAYER_SIZE = 25;
+const PLAYER_SPEED = 4;
 let playerPreviousX = null;
 let playerPreviousY = null;
-let playerPositionX = Math.random() * canvas.width;
-let playerPositionY = Math.random() * canvas.height;
+let playerPositionX = (Math.random() * 2 * CANVAS_WORLD_SPACE_WIDTH) - CANVAS_WORLD_SPACE_WIDTH;
+let playerPositionY = (Math.random() * 2 * CANVAS_WORLD_SPACE_HEIGHT) - CANVAS_WORLD_SPACE_HEIGHT;
 
 // Set the player's initial position on the server
 socket.emit('player_move', playerPositionX, playerPositionY);
@@ -105,35 +131,39 @@ function tick(t) {
     if (playerPositionX !== playerPreviousX || playerPositionY !== playerPreviousY)
         socket.emit('player_move', playerPositionX, playerPositionY);
 
-    if (playerPositionY - PLAYER_SIZE / 2 < 0)
-        playerPositionY = 0 + PLAYER_SIZE / 2;
-    if (playerPositionX + PLAYER_SIZE / 2 > canvas.width)
-        playerPositionX = canvas.width - PLAYER_SIZE / 2;
-    if (playerPositionY + PLAYER_SIZE / 2 > canvas.height)
-        playerPositionY = canvas.height - PLAYER_SIZE / 2;
-    if (playerPositionX - PLAYER_SIZE / 2 < 0)
-        playerPositionX = 0 + PLAYER_SIZE / 2;
+    if (playerPositionY - PLAYER_SIZE / 2 < -CANVAS_WORLD_SPACE_HEIGHT)
+        playerPositionY = -CANVAS_WORLD_SPACE_HEIGHT + PLAYER_SIZE / 2;
+    if (playerPositionX + PLAYER_SIZE / 2 > CANVAS_WORLD_SPACE_WIDTH)
+        playerPositionX = CANVAS_WORLD_SPACE_WIDTH - PLAYER_SIZE / 2;
+    if (playerPositionY + PLAYER_SIZE / 2 > CANVAS_WORLD_SPACE_HEIGHT)
+        playerPositionY = CANVAS_WORLD_SPACE_HEIGHT - PLAYER_SIZE / 2;
+    if (playerPositionX - PLAYER_SIZE / 2 < -CANVAS_WORLD_SPACE_WIDTH)
+        playerPositionX = -CANVAS_WORLD_SPACE_WIDTH + PLAYER_SIZE / 2;
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     for (const player of otherPlayers) {
         if (player.posX === null) continue;
 
+        const playerPos = toScreenSpacePoint(new Point(player.posX, player.posY));
+
         context.fillStyle = PLAYER_COLOURS[player.colourIndex];
         context.fillRect(
-            player.posX - PLAYER_SIZE / 2,
-            player.posY - PLAYER_SIZE / 2,
-            PLAYER_SIZE,
-            PLAYER_SIZE
+            playerPos.x - playerSizeScreenSpace / 2,
+            playerPos.y - playerSizeScreenSpace / 2,
+            playerSizeScreenSpace,
+            playerSizeScreenSpace
         );
     }
 
+    const playerPos = toScreenSpacePoint(new Point(playerPositionX, playerPositionY));
+
     context.fillStyle = PLAYER_COLOURS[playerColourIndex];
     context.fillRect(
-        playerPositionX - PLAYER_SIZE / 2,
-        playerPositionY - PLAYER_SIZE / 2,
-        PLAYER_SIZE,
-        PLAYER_SIZE
+        playerPos.x - playerSizeScreenSpace / 2,
+        playerPos.y - playerSizeScreenSpace / 2,
+        playerSizeScreenSpace,
+        playerSizeScreenSpace
     );
 
     requestAnimationFrame(tick);
