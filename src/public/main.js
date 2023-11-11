@@ -1,17 +1,12 @@
-const socket = io();
+import { Vector2 } from './vector.js';
 
-class Point {
-    constructor(x, y) { // TODO: Default to 0?
-        this.x = x;
-        this.y = y;
-    }
-}
+const socket = io();
 
 const CANVAS_WORLD_SPACE_WIDTH = 20;
 const CANVAS_WORLD_SPACE_HEIGHT = 20;
 
 function worldSpacePointToScreenSpace(point) {
-    return new Point(
+    return new Vector2(
         canvas.width / 2 + point.x * canvas.width / CANVAS_WORLD_SPACE_WIDTH,
         canvas.height / 2 + point.y * canvas.height / CANVAS_WORLD_SPACE_HEIGHT
     );
@@ -23,7 +18,7 @@ function worldSpaceLengthToScreenSpace(length) {
 }
 
 function screenSpacePointToWorldSpace(point) {
-    return new Point(
+    return new Vector2(
         point.x / canvas.width * CANVAS_WORLD_SPACE_WIDTH - CANVAS_WORLD_SPACE_WIDTH / 2,
         point.y / canvas.height * CANVAS_WORLD_SPACE_HEIGHT - CANVAS_WORLD_SPACE_HEIGHT / 2
     );
@@ -34,7 +29,7 @@ function normalizeLength(startPoint, endPoint) {
     const lengthY = endPoint.y - startPoint.y;
     const length = Math.sqrt(lengthX * lengthX + lengthY * lengthY);
 
-    return new Point(lengthX / length, lengthY / length);
+    return new Vector2(lengthX / length, lengthY / length);
 }
 
 const canvas = document.getElementById('canvas');
@@ -97,19 +92,19 @@ addEventListener('keyup', event => {
     }
 });
 
-let target = new Point(0, 0);
+let target = new Vector2(0, 0);
 
 addEventListener('mousedown', event => {
     if (event.button !== 0) return;
 
     const direction = normalizeLength(
-        new Point(playerPositionX, playerPositionY),
+        new Vector2(playerPositionX, playerPositionY),
         screenSpacePointToWorldSpace(
-            new Point(event.x - canvas.offsetLeft, event.y - canvas.offsetTop)
+            new Vector2(event.x - canvas.offsetLeft, event.y - canvas.offsetTop)
         )
     );
 
-    target = new Point(playerPositionX + direction.x, playerPositionY + direction.y);
+    target = new Vector2(playerPositionX + direction.x, playerPositionY + direction.y);
 });
 
 const otherPlayers = [];
@@ -135,16 +130,17 @@ socket.on('player_disconnected', (id) => {
 });
 
 const PLAYER_SPEED = 4;
-let playerPreviousX = null;
-let playerPreviousY = null;
+let playerPreviousX;
+let playerPreviousY;
 let playerPositionX = (Math.random() * CANVAS_WORLD_SPACE_WIDTH) - CANVAS_WORLD_SPACE_WIDTH / 2;
 let playerPositionY = (Math.random() * CANVAS_WORLD_SPACE_HEIGHT) - CANVAS_WORLD_SPACE_HEIGHT / 2;
 
 // Set the player's initial position on the server
 socket.emit('player_move', playerPositionX, playerPositionY);
 
+// TODO: Manage the deltaTime for the first frame properly (currently includes loading time)
 let prev = 0;
-let deltaTime = 0;
+let deltaTime;
 
 function tick(t) {
     deltaTime = (t - prev) / 1000;
@@ -172,8 +168,8 @@ function tick(t) {
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    const lineStart = worldSpacePointToScreenSpace(new Point(playerPositionX, playerPositionY));
-    const lineEnd = worldSpacePointToScreenSpace(new Point(target.x, target.y));
+    const lineStart = worldSpacePointToScreenSpace(new Vector2(playerPositionX, playerPositionY));
+    const lineEnd = worldSpacePointToScreenSpace(new Vector2(target.x, target.y));
 
     context.beginPath();
     context.strokeStyle = 'rgb(255, 255, 255)';
@@ -185,7 +181,7 @@ function tick(t) {
     for (const player of otherPlayers) {
         if (player.posX === null) continue;
 
-        const playerPos = worldSpacePointToScreenSpace(new Point(player.posX, player.posY));
+        const playerPos = worldSpacePointToScreenSpace(new Vector2(player.posX, player.posY));
 
         context.fillStyle = PLAYER_COLOURS[player.colourIndex];
         context.fillRect(
@@ -196,7 +192,7 @@ function tick(t) {
         );
     }
 
-    const playerPos = worldSpacePointToScreenSpace(new Point(playerPositionX, playerPositionY));
+    const playerPos = worldSpacePointToScreenSpace(new Vector2(playerPositionX, playerPositionY));
 
     context.fillStyle = PLAYER_COLOURS[playerColourIndex];
     context.fillRect(
