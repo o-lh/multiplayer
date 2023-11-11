@@ -1,7 +1,7 @@
 const socket = io();
 
 class Point {
-    constructor(x, y) {
+    constructor(x, y) { // TODO: Default to 0?
         this.x = x;
         this.y = y;
     }
@@ -27,6 +27,14 @@ function screenSpacePointToWorldSpace(point) {
         point.x / canvas.width * CANVAS_WORLD_SPACE_WIDTH - CANVAS_WORLD_SPACE_WIDTH / 2,
         point.y / canvas.height * CANVAS_WORLD_SPACE_HEIGHT - CANVAS_WORLD_SPACE_HEIGHT / 2
     );
+}
+
+function normalizeLength(startPoint, endPoint) {
+    const lengthX = endPoint.x - startPoint.x;
+    const lengthY = endPoint.y - startPoint.y;
+    const length = Math.sqrt(lengthX * lengthX + lengthY * lengthY);
+
+    return new Point(lengthX / length, lengthY / length);
 }
 
 const canvas = document.getElementById('canvas');
@@ -89,13 +97,19 @@ addEventListener('keyup', event => {
     }
 });
 
-// TODO: Make canvas fill the entire window
-canvas.addEventListener('mousedown', event => {
+let target = new Point(0, 0);
+
+addEventListener('mousedown', event => {
     if (event.button !== 0) return;
 
-    console.log(screenSpacePointToWorldSpace(
-        new Point(event.x - canvas.offsetLeft, event.y - canvas.offsetTop)
-    ));
+    const direction = normalizeLength(
+        new Point(playerPositionX, playerPositionY),
+        screenSpacePointToWorldSpace(
+            new Point(event.x - canvas.offsetLeft, event.y - canvas.offsetTop)
+        )
+    );
+
+    target = new Point(playerPositionX + direction.x, playerPositionY + direction.y);
 });
 
 const otherPlayers = [];
@@ -144,9 +158,6 @@ function tick(t) {
     if (holdS) playerPositionY += PLAYER_SPEED * deltaTime;
     if (holdA) playerPositionX -= PLAYER_SPEED * deltaTime;
 
-    if (playerPositionX !== playerPreviousX || playerPositionY !== playerPreviousY)
-        socket.emit('player_move', playerPositionX, playerPositionY);
-
     if (playerPositionY - PLAYER_SIZE / 2 < -CANVAS_WORLD_SPACE_HEIGHT / 2)
         playerPositionY = -CANVAS_WORLD_SPACE_HEIGHT / 2 + PLAYER_SIZE / 2;
     if (playerPositionX + PLAYER_SIZE / 2 > CANVAS_WORLD_SPACE_WIDTH / 2)
@@ -156,7 +167,20 @@ function tick(t) {
     if (playerPositionX - PLAYER_SIZE / 2 < -CANVAS_WORLD_SPACE_WIDTH / 2)
         playerPositionX = -CANVAS_WORLD_SPACE_WIDTH / 2 + PLAYER_SIZE / 2;
 
+    if (playerPositionX !== playerPreviousX || playerPositionY !== playerPreviousY)
+        socket.emit('player_move', playerPositionX, playerPositionY);
+
     context.clearRect(0, 0, canvas.width, canvas.height);
+
+    const lineStart = worldSpacePointToScreenSpace(new Point(playerPositionX, playerPositionY));
+    const lineEnd = worldSpacePointToScreenSpace(new Point(target.x, target.y));
+
+    context.beginPath();
+    context.strokeStyle = 'rgb(255, 255, 255)';
+    context.lineWidth = 2;
+    context.moveTo(lineStart.x, lineStart.y);
+    context.lineTo(lineEnd.x, lineEnd.y);
+    context.stroke();
 
     for (const player of otherPlayers) {
         if (player.posX === null) continue;
