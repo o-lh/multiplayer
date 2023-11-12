@@ -1,3 +1,4 @@
+import { Projectile } from './projectile.js';
 import { Vector2 } from './vector2.js';
 
 const socket = io();
@@ -86,8 +87,6 @@ addEventListener('keyup', event => {
     }
 });
 
-let target = new Vector2(0, 0);
-
 addEventListener('mousedown', event => {
     if (event.button !== 0) return;
 
@@ -97,10 +96,11 @@ addEventListener('mousedown', event => {
 
     const direction = Vector2.subtract(clickPosition, playerPosition).normalized;
 
-    target = Vector2.add(playerPosition, direction);
+    projectiles.push(new Projectile(playerPosition, Vector2.add(playerPosition, direction)));
 });
 
 const otherPlayers = [];
+const projectiles = [];
 
 socket.on('player_connected', newPlayer => {
     otherPlayers.push(newPlayer);
@@ -160,15 +160,17 @@ function tick(t) {
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    const lineStart = worldSpacePointToScreenSpace(playerPosition);
-    const lineEnd = worldSpacePointToScreenSpace(target);
+    for (const projectile of projectiles) {
+        const lineStart = worldSpacePointToScreenSpace(projectile.origin);
+        const lineEnd = worldSpacePointToScreenSpace(projectile.direction);
 
-    context.beginPath();
-    context.strokeStyle = 'rgb(255, 255, 255)';
-    context.lineWidth = 2;
-    context.moveTo(lineStart.x, lineStart.y);
-    context.lineTo(lineEnd.x, lineEnd.y);
-    context.stroke();
+        context.beginPath();
+        context.strokeStyle = 'rgb(255, 255, 255)';
+        context.lineWidth = 2;
+        context.moveTo(lineStart.x, lineStart.y);
+        context.lineTo(lineEnd.x, lineEnd.y);
+        context.stroke();
+    }
 
     for (const player of otherPlayers) {
         const playerPos = worldSpacePointToScreenSpace(player.position);
