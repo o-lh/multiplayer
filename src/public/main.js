@@ -58,7 +58,7 @@ const PLAYER_COLOURS = [
     'rgb(192, 0, 255)'
 ];
 
-let playerColourIndex = 0;
+let playerColour = 0;
 
 addEventListener('keydown', event => {
     if (event.repeat) return;
@@ -69,9 +69,9 @@ addEventListener('keydown', event => {
         case 'KeyS': holdS = true; break;
         case 'KeyD': holdD = true; break;
         case 'Space': {
-            ++playerColourIndex;
-            if (playerColourIndex >= PLAYER_COLOURS.length) playerColourIndex = 0;
-            socket.emit('player_change_colour', playerColourIndex);
+            ++playerColour;
+            if (playerColour >= PLAYER_COLOURS.length) playerColour = 0;
+            socket.emit('player_change_colour', playerColour);
             break;
         }
     }
@@ -102,22 +102,21 @@ addEventListener('mousedown', event => {
 
 const otherPlayers = [];
 
-socket.on('player_connected', (id, posX, posY, colourIndex) => {
-    otherPlayers.push({ id, posX, posY, colourIndex });
+socket.on('player_connected', newPlayer => {
+    otherPlayers.push(newPlayer);
 });
 
-socket.on('player_move', (id, posX, posY) => {
+socket.on('player_move', (id, position) => {
     const index = otherPlayers.findIndex(player => player.id === id);
-    otherPlayers[index].posX = posX;
-    otherPlayers[index].posY = posY;
+    otherPlayers[index].position = position;
 });
 
-socket.on('player_change_colour', (id, colourIndex) => {
+socket.on('player_change_colour', (id, colour) => {
     const index = otherPlayers.findIndex(player => player.id === id);
-    otherPlayers[index].colourIndex = colourIndex;
+    otherPlayers[index].colour = colour;
 });
 
-socket.on('player_disconnected', (id) => {
+socket.on('player_disconnected', id => {
     const index = otherPlayers.findIndex(player => player.id === id);
     otherPlayers.splice(index, 1);
 });
@@ -130,7 +129,7 @@ let playerPosition = new Vector2(
 );
 
 // Set the player's initial position on the server
-socket.emit('player_move', playerPosition.x, playerPosition.y);
+socket.emit('player_move', playerPosition);
 
 // TODO: Manage the deltaTime for the first frame properly (currently includes loading time)
 let prev = 0;
@@ -157,7 +156,7 @@ function tick(t) {
         playerPosition.x = -CANVAS_WORLD_SPACE_WIDTH / 2 + PLAYER_SIZE / 2;
 
     if (!Vector2.equal(playerPosition, playerPrevious))
-        socket.emit('player_move', playerPosition.x, playerPosition.y);
+        socket.emit('player_move', playerPosition);
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -172,11 +171,9 @@ function tick(t) {
     context.stroke();
 
     for (const player of otherPlayers) {
-        if (player.posX === null) continue;
+        const playerPos = worldSpacePointToScreenSpace(player.position);
 
-        const playerPos = worldSpacePointToScreenSpace(new Vector2(player.posX, player.posY));
-
-        context.fillStyle = PLAYER_COLOURS[player.colourIndex];
+        context.fillStyle = PLAYER_COLOURS[player.colour];
         context.fillRect(
             playerPos.x - playerSizeScreenSpace / 2,
             playerPos.y - playerSizeScreenSpace / 2,
@@ -187,7 +184,7 @@ function tick(t) {
 
     const playerPos = worldSpacePointToScreenSpace(playerPosition);
 
-    context.fillStyle = PLAYER_COLOURS[playerColourIndex];
+    context.fillStyle = PLAYER_COLOURS[playerColour];
     context.fillRect(
         playerPos.x - playerSizeScreenSpace / 2,
         playerPos.y - playerSizeScreenSpace / 2,

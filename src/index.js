@@ -2,10 +2,12 @@ import { dirname, join } from 'node:path';
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 
+import { Server } from 'socket.io';
 import express from 'express';
 import favicon from 'serve-favicon';
 
-import { Server } from 'socket.io';
+import { Player } from './public/player.js'
+import { Vector2 } from './public/vector2.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -24,27 +26,28 @@ app.use(express.static(join(__dirname, 'public')));
 const players = [];
 
 io.on('connection', (socket) => {
-    // Send all existing players to new player
-    for (let player of players) {
-        socket.emit('player_connected', player.id, player.posX, player.posY, player.colourIndex);
-    }
+    const player = new Player(socket.id, new Vector2(), 0);
 
     // Broadcast new player to all other players
-    socket.broadcast.emit('player_connected', socket.id, null, null, 0);
+    socket.broadcast.emit('player_connected', player);
 
-    players.push({ id: socket.id, posX: null, posY: null, colourIndex: 0 });
+    // Send all existing players to new player
+    for (let otherPlayer of players) {
+        socket.emit('player_connected', otherPlayer);
+    }
 
-    socket.on('player_move', (posX, posY) => {
+    players.push(player);
+
+    socket.on('player_move', position => {
         const index = players.findIndex(player => player.id === socket.id);
-        players[index].posX = posX;
-        players[index].posY = posY;
-        socket.broadcast.emit('player_move', socket.id, posX, posY);
+        players[index].position = position;
+        socket.broadcast.emit('player_move', socket.id, position);
     });
 
-    socket.on('player_change_colour', (colourIndex) => {
+    socket.on('player_change_colour', colour => {
         const index = players.findIndex(player => player.id === socket.id);
-        players[index].colourIndex = colourIndex;
-        socket.broadcast.emit('player_change_colour', socket.id, colourIndex);
+        players[index].colour = colour;
+        socket.broadcast.emit('player_change_colour', socket.id, colour);
     });
 
     socket.on('disconnect', () => {
