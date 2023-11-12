@@ -95,9 +95,9 @@ addEventListener('mousedown', event => {
         new Vector2(event.x - canvas.offsetLeft, event.y - canvas.offsetTop)
     );
 
-    const direction = Vector2.subtract(clickPosition, new Vector2(playerPositionX, playerPositionY)).normalized;
+    const direction = Vector2.subtract(clickPosition, playerPosition).normalized;
 
-    target = new Vector2(playerPositionX + direction.x, playerPositionY + direction.y);
+    target = Vector2.add(playerPosition, direction);
 });
 
 const otherPlayers = [];
@@ -123,13 +123,14 @@ socket.on('player_disconnected', (id) => {
 });
 
 const PLAYER_SPEED = 4;
-let playerPreviousX;
-let playerPreviousY;
-let playerPositionX = (Math.random() * CANVAS_WORLD_SPACE_WIDTH) - CANVAS_WORLD_SPACE_WIDTH / 2;
-let playerPositionY = (Math.random() * CANVAS_WORLD_SPACE_HEIGHT) - CANVAS_WORLD_SPACE_HEIGHT / 2;
+let playerPrevious = new Vector2();
+let playerPosition = new Vector2(
+    (Math.random() * CANVAS_WORLD_SPACE_WIDTH) - CANVAS_WORLD_SPACE_WIDTH / 2,
+    (Math.random() * CANVAS_WORLD_SPACE_HEIGHT) - CANVAS_WORLD_SPACE_HEIGHT / 2
+);
 
 // Set the player's initial position on the server
-socket.emit('player_move', playerPositionX, playerPositionY);
+socket.emit('player_move', playerPosition.x, playerPosition.y);
 
 // TODO: Manage the deltaTime for the first frame properly (currently includes loading time)
 let prev = 0;
@@ -139,30 +140,29 @@ function tick(t) {
     deltaTime = (t - prev) / 1000;
     prev = t;
 
-    playerPreviousX = playerPositionX;
-    playerPreviousY = playerPositionY;
+    playerPrevious = structuredClone(playerPosition);
 
-    if (holdW) playerPositionY -= PLAYER_SPEED * deltaTime;
-    if (holdD) playerPositionX += PLAYER_SPEED * deltaTime;
-    if (holdS) playerPositionY += PLAYER_SPEED * deltaTime;
-    if (holdA) playerPositionX -= PLAYER_SPEED * deltaTime;
+    if (holdW) playerPosition.y -= PLAYER_SPEED * deltaTime;
+    if (holdD) playerPosition.x += PLAYER_SPEED * deltaTime;
+    if (holdS) playerPosition.y += PLAYER_SPEED * deltaTime;
+    if (holdA) playerPosition.x -= PLAYER_SPEED * deltaTime;
 
-    if (playerPositionY - PLAYER_SIZE / 2 < -CANVAS_WORLD_SPACE_HEIGHT / 2)
-        playerPositionY = -CANVAS_WORLD_SPACE_HEIGHT / 2 + PLAYER_SIZE / 2;
-    if (playerPositionX + PLAYER_SIZE / 2 > CANVAS_WORLD_SPACE_WIDTH / 2)
-        playerPositionX = CANVAS_WORLD_SPACE_WIDTH / 2 - PLAYER_SIZE / 2;
-    if (playerPositionY + PLAYER_SIZE / 2 > CANVAS_WORLD_SPACE_HEIGHT / 2)
-        playerPositionY = CANVAS_WORLD_SPACE_HEIGHT / 2 - PLAYER_SIZE / 2;
-    if (playerPositionX - PLAYER_SIZE / 2 < -CANVAS_WORLD_SPACE_WIDTH / 2)
-        playerPositionX = -CANVAS_WORLD_SPACE_WIDTH / 2 + PLAYER_SIZE / 2;
+    if (playerPosition.y - PLAYER_SIZE / 2 < -CANVAS_WORLD_SPACE_HEIGHT / 2)
+        playerPosition.y = -CANVAS_WORLD_SPACE_HEIGHT / 2 + PLAYER_SIZE / 2;
+    if (playerPosition.x + PLAYER_SIZE / 2 > CANVAS_WORLD_SPACE_WIDTH / 2)
+        playerPosition.x = CANVAS_WORLD_SPACE_WIDTH / 2 - PLAYER_SIZE / 2;
+    if (playerPosition.y + PLAYER_SIZE / 2 > CANVAS_WORLD_SPACE_HEIGHT / 2)
+        playerPosition.y = CANVAS_WORLD_SPACE_HEIGHT / 2 - PLAYER_SIZE / 2;
+    if (playerPosition.x - PLAYER_SIZE / 2 < -CANVAS_WORLD_SPACE_WIDTH / 2)
+        playerPosition.x = -CANVAS_WORLD_SPACE_WIDTH / 2 + PLAYER_SIZE / 2;
 
-    if (playerPositionX !== playerPreviousX || playerPositionY !== playerPreviousY)
-        socket.emit('player_move', playerPositionX, playerPositionY);
+    if (!Vector2.equal(playerPosition, playerPrevious))
+        socket.emit('player_move', playerPosition.x, playerPosition.y);
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    const lineStart = worldSpacePointToScreenSpace(new Vector2(playerPositionX, playerPositionY));
-    const lineEnd = worldSpacePointToScreenSpace(new Vector2(target.x, target.y));
+    const lineStart = worldSpacePointToScreenSpace(playerPosition);
+    const lineEnd = worldSpacePointToScreenSpace(target);
 
     context.beginPath();
     context.strokeStyle = 'rgb(255, 255, 255)';
@@ -185,7 +185,7 @@ function tick(t) {
         );
     }
 
-    const playerPos = worldSpacePointToScreenSpace(new Vector2(playerPositionX, playerPositionY));
+    const playerPos = worldSpacePointToScreenSpace(playerPosition);
 
     context.fillStyle = PLAYER_COLOURS[playerColourIndex];
     context.fillRect(

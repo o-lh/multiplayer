@@ -44,6 +44,23 @@ export class Vector2 {
         );
     }
 
+    /**
+     * @param {Vector2[]} vectors
+     */
+    static equal(...vectors) {
+        let allEqual = true;
+
+        vectors.reduce((previousValue, currentValue) => {
+            if (previousValue.x !== currentValue.x || previousValue.y !== currentValue.y) {
+                allEqual = false;
+            }
+
+            return currentValue;
+        });
+
+        return allEqual;
+    }
+
     get magnitude() {
         return Math.sqrt(this.x * this.x + this.y * this.y);
     }
