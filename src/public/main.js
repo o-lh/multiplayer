@@ -96,7 +96,7 @@ addEventListener('mousedown', event => {
 
     const direction = Vector2.subtract(clickPosition, playerPosition).normalized;
 
-    projectiles.push(new Projectile(playerPosition, Vector2.add(playerPosition, direction)));
+    projectiles.push(new Projectile(structuredClone(playerPosition), Vector2.add(playerPosition, direction)));
 });
 
 const otherPlayers = [];
