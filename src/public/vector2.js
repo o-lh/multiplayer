@@ -29,24 +29,6 @@ export class Vector2 {
     /**
      * @param {Vector2[]} vectors
      */
-    static multiply(...vectors) {
-        return vectors.reduce((previousValue, currentValue) =>
-            new Vector2(previousValue.x * currentValue.x, previousValue.y * currentValue.y)
-        );
-    }
-
-    /**
-     * @param {Vector2[]} vectors
-     */
-    static divide(...vectors) {
-        return vectors.reduce((previousValue, currentValue) =>
-            new Vector2(previousValue.x / currentValue.x, previousValue.y / currentValue.y)
-        );
-    }
-
-    /**
-     * @param {Vector2[]} vectors
-     */
     static equal(...vectors) {
         let allEqual = true;
 
