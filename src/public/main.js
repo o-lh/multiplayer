@@ -24,14 +24,6 @@ function screenSpacePointToWorldSpace(point) {
     );
 }
 
-function normalizeLength(startPoint, endPoint) {
-    const lengthX = endPoint.x - startPoint.x;
-    const lengthY = endPoint.y - startPoint.y;
-    const length = Math.sqrt(lengthX * lengthX + lengthY * lengthY);
-
-    return new Vector2(lengthX / length, lengthY / length);
-}
-
 const canvas = document.getElementById('canvas');
 const context = canvas.getContext('2d');
 let smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
@@ -97,12 +89,11 @@ let target = new Vector2(0, 0);
 addEventListener('mousedown', event => {
     if (event.button !== 0) return;
 
-    const direction = normalizeLength(
-        new Vector2(playerPositionX, playerPositionY),
-        screenSpacePointToWorldSpace(
-            new Vector2(event.x - canvas.offsetLeft, event.y - canvas.offsetTop)
-        )
+    const clickPosition = screenSpacePointToWorldSpace(
+        new Vector2(event.x - canvas.offsetLeft, event.y - canvas.offsetTop)
     );
+
+    const direction = Vector2.subtract(clickPosition, new Vector2(playerPositionX, playerPositionY)).normalized;
 
     target = new Vector2(playerPositionX + direction.x, playerPositionY + direction.y);
 });
