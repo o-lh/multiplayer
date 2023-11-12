@@ -1,31 +1,43 @@
 export class Vector2 {
     /**
-     * @param {number} x 
-     * @param {number} y 
+     * @param {number} x
+     * @param {number} y
      */
     constructor(x = 0, y = 0) {
         this.x = x;
         this.y = y;
     }
 
+    /**
+     * @param {Vector2[]} vectors
+     */
     static add(...vectors) {
         return vectors.reduce((previousValue, currentValue) =>
             new Vector2(previousValue.x + currentValue.x, previousValue.y + currentValue.y)
         );
     }
 
+    /**
+     * @param {Vector2[]} vectors
+     */
     static subtract(...vectors) {
         return vectors.reduce((previousValue, currentValue) =>
             new Vector2(previousValue.x - currentValue.x, previousValue.y - currentValue.y)
         );
     }
 
+    /**
+     * @param {Vector2[]} vectors
+     */
     static multiply(...vectors) {
         return vectors.reduce((previousValue, currentValue) =>
             new Vector2(previousValue.x * currentValue.x, previousValue.y * currentValue.y)
         );
     }
 
+    /**
+     * @param {Vector2[]} vectors
+     */
     static divide(...vectors) {
         return vectors.reduce((previousValue, currentValue) =>
             new Vector2(previousValue.x / currentValue.x, previousValue.y / currentValue.y)
