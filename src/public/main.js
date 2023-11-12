@@ -33,6 +33,8 @@ canvas.height = smallerDimension;
 const PLAYER_SIZE = 0.5;
 let playerSizeScreenSpace = worldSpaceLengthToScreenSpace(PLAYER_SIZE);
 
+addEventListener('contextmenu', event => event.preventDefault());
+
 addEventListener('resize', _ => {
     smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
     canvas.width = smallerDimension;
