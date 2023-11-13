@@ -17,6 +17,8 @@ const io = new Server(server);
 
 app.use(favicon(join(__dirname, 'public', 'favicon.ico')));
 app.use(express.static(join(__dirname, 'public')));
+// TODO: Sending the whole folder is wasteful, so for the sake of page load time, write a smaller UUID function and use that instead
+app.use('/uuid', express.static(join(__dirname, '..', 'node_modules', 'uuid', 'dist', 'esm-browser')));
 
 // TODO: Store session IDs
 // - https://socket.io/get-started/private-messaging-part-2/

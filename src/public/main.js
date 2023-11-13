@@ -1,5 +1,9 @@
+import { default as uuidv4 } from './uuid/v4.js';
+
 import { Projectile } from './projectile.js';
 import { Vector2 } from './vector2.js';
+
+for (let i = 0; i < 10; ++i) console.log(uuidv4());
 
 const socket = io();
 
