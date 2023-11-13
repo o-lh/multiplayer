@@ -12,5 +12,7 @@ body {
 }
 
 canvas {
+    aspect-ratio: 1;
     background-color: #444;
+    height: 100%;
 }
