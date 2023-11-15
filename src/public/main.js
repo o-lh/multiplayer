@@ -3,8 +3,6 @@ import { default as uuidv4 } from './uuid/v4.js';
 import { Projectile } from './projectile.js';
 import { Vector2 } from './vector2.js';
 
-for (let i = 0; i < 10; ++i) console.log(uuidv4());
-
 const socket = io();
 
 const CANVAS_WORLD_SPACE_WIDTH = 20;
@@ -100,7 +98,19 @@ addEventListener('mousedown', event => {
 
     const direction = Vector2.subtract(clickPosition, playerPosition).normalized;
 
-    projectiles.push(new Projectile(structuredClone(playerPosition), Vector2.add(playerPosition, direction)));
+    const projectile = new Projectile(
+        uuidv4(),
+        socket.id,
+        structuredClone(playerPosition),
+        direction,
+        1,
+        Vector2.add(playerPosition, direction),
+        structuredClone(playerPosition)
+    );
+
+    // TODO: CreateNetworkObject function?
+    projectiles.push(projectile);
+    socket.emit('create_projectile', projectile);
 });
 
 const otherPlayers = [];
@@ -118,6 +128,10 @@ socket.on('player_move', (id, position) => {
 socket.on('player_change_colour', (id, colour) => {
     const index = otherPlayers.findIndex(player => player.id === id);
     otherPlayers[index].colour = colour;
+});
+
+socket.on('create_projectile', projectile => {
+    projectiles.push(projectile);
 });
 
 socket.on('player_disconnected', id => {
@@ -166,7 +180,7 @@ function tick(t) {
 
     for (const projectile of projectiles) {
         const lineStart = worldSpacePointToScreenSpace(projectile.origin);
-        const lineEnd = worldSpacePointToScreenSpace(projectile.direction);
+        const lineEnd = worldSpacePointToScreenSpace(projectile.head);
 
         context.beginPath();
         context.strokeStyle = 'rgb(255, 255, 255)';
@@ -201,4 +215,5 @@ function tick(t) {
     requestAnimationFrame(tick);
 }
 
+// TODO: socket.id is undefined initially. Perhaps only start once it is defined?
 requestAnimationFrame(tick);
