@@ -104,7 +104,7 @@ addEventListener('mousedown', event => {
         structuredClone(playerPosition),
         direction,
         1,
-        Vector2.add(playerPosition, direction),
+        structuredClone(playerPosition),
         structuredClone(playerPosition)
     );
 
@@ -179,6 +179,11 @@ function tick(t) {
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     for (const projectile of projectiles) {
+        projectile.head = Vector2.add(
+            projectile.head,
+            Vector2.multiplyScalar(projectile.direction, projectile.speed * deltaTime)
+        );
+
         const lineStart = worldSpacePointToScreenSpace(projectile.origin);
         const lineEnd = worldSpacePointToScreenSpace(projectile.head);
 

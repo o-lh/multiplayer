@@ -27,6 +27,14 @@ export class Vector2 {
     }
 
     /**
+     * @param {Vector2} vector
+     * @param {number} scalar
+     */
+    static multiplyScalar(vector, scalar) {
+        return new Vector2(vector.x * scalar, vector.y * scalar);
+    }
+
+    /**
      * @param {Vector2[]} vectors
      */
     static equal(...vectors) {
