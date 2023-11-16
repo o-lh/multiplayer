@@ -60,4 +60,8 @@ export class Vector2 {
     
         return new Vector2(this.x / magnitude, this.y / magnitude);
     }
+
+    get sqrMagnitude() {
+        return this.x * this.x + this.y * this.y;
+    }
 }

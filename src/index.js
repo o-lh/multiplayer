@@ -6,6 +6,7 @@ import { Server } from 'socket.io';
 import express from 'express';
 import favicon from 'serve-favicon';
 
+// TODO: /shared or /common folder?
 import { Player } from './public/player.js'
 import { Vector2 } from './public/vector2.js'
 

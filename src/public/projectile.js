@@ -1,3 +1,5 @@
+import { Vector2 } from "./vector2.js";
+
 export class Projectile {
     /**
      * @param {string} id
@@ -16,5 +18,29 @@ export class Projectile {
         this.speed = speed;
         this.head = head;
         this.tail = tail;
+    }
+
+    /**
+     * @param {number} deltaTime 
+     */
+    update(deltaTime) {
+        this.head = Vector2.add(
+            this.head,
+            Vector2.multiplyScalar(this.direction, this.speed * deltaTime)
+        );
+
+        this.tail = Vector2.subtract(
+            this.head,
+            Vector2.multiplyScalar(this.direction, 2)
+        );
+
+        if (this.#isTailPastOrigin()) this.tail = this.origin;
+    }
+
+    #isTailPastOrigin() {
+        const sqrToTail = Vector2.subtract(this.head, this.tail).sqrMagnitude;
+        const sqrToOrigin = Vector2.subtract(this.head, this.origin).sqrMagnitude;
+
+        return sqrToTail > sqrToOrigin;
     }
 }
