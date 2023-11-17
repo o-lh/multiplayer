@@ -33,8 +33,8 @@ let smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
 canvas.width = smallerDimension;
 canvas.height = smallerDimension;
 
-const PLAYER_SIZE = 0.5;
-let playerSizeScreenSpace = worldSpaceLengthToScreenSpace(PLAYER_SIZE);
+const PLAYER_RADIUS = 0.25;
+let playerRadiusScreenSpace = worldSpaceLengthToScreenSpace(PLAYER_RADIUS);
 
 addEventListener('contextmenu', event => event.preventDefault());
 
@@ -43,7 +43,7 @@ addEventListener('resize', _ => {
     canvas.width = smallerDimension;
     canvas.height = smallerDimension;
 
-    playerSizeScreenSpace = worldSpaceLengthToScreenSpace(PLAYER_SIZE);
+    playerRadiusScreenSpace = worldSpaceLengthToScreenSpace(PLAYER_RADIUS);
 });
 
 let holdW = false;
@@ -173,14 +173,14 @@ function tick(t) {
     if (holdS) playerPosition.y += PLAYER_SPEED * deltaTime;
     if (holdA) playerPosition.x -= PLAYER_SPEED * deltaTime;
 
-    if (playerPosition.y - PLAYER_SIZE / 2 < -CANVAS_WORLD_SPACE_HEIGHT / 2)
-        playerPosition.y = -CANVAS_WORLD_SPACE_HEIGHT / 2 + PLAYER_SIZE / 2;
-    if (playerPosition.x + PLAYER_SIZE / 2 > CANVAS_WORLD_SPACE_WIDTH / 2)
-        playerPosition.x = CANVAS_WORLD_SPACE_WIDTH / 2 - PLAYER_SIZE / 2;
-    if (playerPosition.y + PLAYER_SIZE / 2 > CANVAS_WORLD_SPACE_HEIGHT / 2)
-        playerPosition.y = CANVAS_WORLD_SPACE_HEIGHT / 2 - PLAYER_SIZE / 2;
-    if (playerPosition.x - PLAYER_SIZE / 2 < -CANVAS_WORLD_SPACE_WIDTH / 2)
-        playerPosition.x = -CANVAS_WORLD_SPACE_WIDTH / 2 + PLAYER_SIZE / 2;
+    if (playerPosition.y - PLAYER_RADIUS < -CANVAS_WORLD_SPACE_HEIGHT / 2)
+        playerPosition.y = -CANVAS_WORLD_SPACE_HEIGHT / 2 + PLAYER_RADIUS;
+    if (playerPosition.x + PLAYER_RADIUS > CANVAS_WORLD_SPACE_WIDTH / 2)
+        playerPosition.x = CANVAS_WORLD_SPACE_WIDTH / 2 - PLAYER_RADIUS;
+    if (playerPosition.y + PLAYER_RADIUS > CANVAS_WORLD_SPACE_HEIGHT / 2)
+        playerPosition.y = CANVAS_WORLD_SPACE_HEIGHT / 2 - PLAYER_RADIUS;
+    if (playerPosition.x - PLAYER_RADIUS < -CANVAS_WORLD_SPACE_WIDTH / 2)
+        playerPosition.x = -CANVAS_WORLD_SPACE_WIDTH / 2 + PLAYER_RADIUS;
 
     if (!Vector2.equal(playerPosition, playerPrevious))
         socket.emit('player_move', playerPosition);
@@ -209,24 +209,18 @@ function tick(t) {
     for (const player of otherPlayers) {
         const playerPos = worldSpacePointToScreenSpace(player.position);
 
+        context.beginPath();
+        context.arc(playerPos.x, playerPos.y, playerRadiusScreenSpace, 0, 2 * Math.PI, false);
         context.fillStyle = PLAYER_COLOURS[player.colour];
-        context.fillRect(
-            playerPos.x - playerSizeScreenSpace / 2,
-            playerPos.y - playerSizeScreenSpace / 2,
-            playerSizeScreenSpace,
-            playerSizeScreenSpace
-        );
+        context.fill();
     }
 
     const playerPos = worldSpacePointToScreenSpace(playerPosition);
 
+    context.beginPath();
+    context.arc(playerPos.x, playerPos.y, playerRadiusScreenSpace, 0, 2 * Math.PI, false);
     context.fillStyle = PLAYER_COLOURS[playerColour];
-    context.fillRect(
-        playerPos.x - playerSizeScreenSpace / 2,
-        playerPos.y - playerSizeScreenSpace / 2,
-        playerSizeScreenSpace,
-        playerSizeScreenSpace
-    );
+    context.fill();
 
     requestAnimationFrame(tick);
 }
