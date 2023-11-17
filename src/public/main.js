@@ -71,6 +71,10 @@ addEventListener('keydown', event => {
         case 'KeyA': holdA = true; break;
         case 'KeyS': holdS = true; break;
         case 'KeyD': holdD = true; break;
+        case 'ArrowUp': holdW = true; break;
+        case 'ArrowLeft': holdA = true; break;
+        case 'ArrowDown': holdS = true; break;
+        case 'ArrowRight': holdD = true; break;
         case 'Space': {
             ++playerColour;
             if (playerColour >= PLAYER_COLOURS.length) playerColour = 0;
@@ -86,6 +90,10 @@ addEventListener('keyup', event => {
         case 'KeyA': holdA = false; break;
         case 'KeyS': holdS = false; break;
         case 'KeyD': holdD = false; break;
+        case 'ArrowUp': holdW = false; break;
+        case 'ArrowLeft': holdA = false; break;
+        case 'ArrowDown': holdS = false; break;
+        case 'ArrowRight': holdD = false; break;
     }
 });
 
