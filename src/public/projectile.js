@@ -12,6 +12,7 @@ export class Projectile {
      */
     constructor(id, owner, origin, direction, speed, head, tail) {
         this.id = id;
+        this.destroyed = false;
         this.owner = owner;
         this.origin = origin;
         this.direction = direction;
@@ -28,6 +29,12 @@ export class Projectile {
             this.head,
             Vector2.multiplyScalar(this.direction, this.speed * deltaTime)
         );
+
+        // TODO: These boundaries are hard-coded
+        if (this.head.y < -20 || this.head.x > 20 || this.head.y > 20 || this.head.x < -20) {
+            this.destroyed = true;
+            return;
+        }
 
         this.tail = Vector2.subtract(
             this.head,

@@ -1,4 +1,4 @@
-import { default as uuidv4 } from './uuid/v4.js';
+import { v4 as uuidv4 } from './uuid/index.js';
 
 import { Projectile } from './projectile.js';
 import { Vector2 } from './vector2.js';
@@ -109,7 +109,7 @@ addEventListener('mousedown', event => {
     );
 
     // TODO: CreateNetworkObject function?
-    projectiles.push(projectile);
+    projectiles.unshift(projectile);
     socket.emit('create_projectile', projectile);
 });
 
@@ -131,7 +131,16 @@ socket.on('player_change_colour', (id, colour) => {
 });
 
 socket.on('create_projectile', projectile => {
-    projectiles.push(projectile);
+    // TODO: Is there a better way to reconstruct these objects? Or not have to reconstruct them?
+    projectiles.unshift(new Projectile(
+        projectile.id,
+        projectile.owner,
+        projectile.origin,
+        projectile.direction,
+        projectile.speed,
+        projectile.head,
+        projectile.tail
+    ));
 });
 
 socket.on('player_disconnected', id => {
@@ -178,11 +187,16 @@ function tick(t) {
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (const projectile of projectiles) {
-        projectile.update(deltaTime);
+    for (let i = projectiles.length - 1; i >= 0; --i) {
+        projectiles[i].update(deltaTime);
 
-        const lineStart = worldSpacePointToScreenSpace(projectile.tail);
-        const lineEnd = worldSpacePointToScreenSpace(projectile.head);
+        if (projectiles[i].destroyed) {
+            projectiles.splice(i, 1);
+            continue;
+        }
+
+        const lineStart = worldSpacePointToScreenSpace(projectiles[i].tail);
+        const lineEnd = worldSpacePointToScreenSpace(projectiles[i].head);
 
         context.beginPath();
         context.strokeStyle = 'rgb(255, 255, 255)';
