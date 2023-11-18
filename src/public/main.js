@@ -109,7 +109,7 @@ addEventListener('mousedown', event => {
     const projectile = new Projectile(
         uuidv4(),
         socket.id,
-        structuredClone(playerPosition),
+        Vector2.add(structuredClone(playerPosition), Vector2.multiplyScalar(direction, PLAYER_RADIUS)),
         direction,
         50,
         structuredClone(playerPosition),
