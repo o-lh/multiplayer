@@ -52,7 +52,7 @@ export class Vector2 {
     }
 
     get magnitude() {
-        return Math.sqrt(this.x * this.x + this.y * this.y);
+        return Math.sqrt(this.x ** 2 + this.y ** 2);
     }
 
     get normalized() {
@@ -62,6 +62,6 @@ export class Vector2 {
     }
 
     get sqrMagnitude() {
-        return this.x * this.x + this.y * this.y;
+        return this.x ** 2 + this.y ** 2;
     }
 }
