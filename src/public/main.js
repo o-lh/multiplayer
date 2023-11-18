@@ -46,10 +46,14 @@ addEventListener('resize', _ => {
     playerRadiusScreenSpace = worldSpaceLengthToScreenSpace(PLAYER_RADIUS);
 });
 
+let mousePosition = new Vector2();
 let holdW = false;
 let holdA = false;
 let holdS = false;
 let holdD = false;
+let holdAttack = false;
+const ATTACK_INTERVAL = 0.1;
+let attackT = 0;
 
 const PLAYER_COLOURS = [
     'rgb(255, 0, 0)',
@@ -100,25 +104,16 @@ addEventListener('keyup', event => {
 addEventListener('mousedown', event => {
     if (event.button !== 0) return;
 
-    const clickPosition = screenSpacePointToWorldSpace(
-        new Vector2(event.x - canvas.offsetLeft, event.y - canvas.offsetTop)
-    );
+    holdAttack = true;
+    mousePosition.x = event.x;
+    mousePosition.y = event.y;
+});
 
-    const direction = Vector2.subtract(clickPosition, playerPosition).normalized;
+addEventListener('mouseup', event => { if (event.button === 0) holdAttack = false; });
 
-    const projectile = new Projectile(
-        uuidv4(),
-        socket.id,
-        Vector2.add(structuredClone(playerPosition), Vector2.multiplyScalar(direction, PLAYER_RADIUS)),
-        direction,
-        50,
-        structuredClone(playerPosition),
-        structuredClone(playerPosition)
-    );
-
-    // TODO: CreateNetworkObject function?
-    projectiles.unshift(projectile);
-    socket.emit('create_projectile', projectile);
+addEventListener('mousemove', event => {
+    mousePosition.x = event.x;
+    mousePosition.y = event.y;
 });
 
 const otherPlayers = [];
@@ -190,6 +185,38 @@ function tick(t) {
     if (playerPosition.x - PLAYER_RADIUS < -CANVAS_WORLD_SPACE_WIDTH / 2)
         playerPosition.x = -CANVAS_WORLD_SPACE_WIDTH / 2 + PLAYER_RADIUS;
 
+    if (holdAttack) {
+        if (attackT <= 0) {
+            const clickPosition = screenSpacePointToWorldSpace(
+                new Vector2(
+                    mousePosition.x - canvas.offsetLeft,
+                    mousePosition.y - canvas.offsetTop
+                )
+            );
+
+            const direction = Vector2.subtract(clickPosition, playerPosition).normalized;
+
+            const projectile = new Projectile(
+                uuidv4(),
+                socket.id,
+                Vector2.add(
+                    structuredClone(playerPosition),
+                    Vector2.multiplyScalar(direction, PLAYER_RADIUS)
+                ),
+                direction,
+                50,
+                structuredClone(playerPosition),
+                structuredClone(playerPosition)
+            );
+
+            // TODO: CreateNetworkObject function?
+            projectiles.unshift(projectile);
+            socket.emit('create_projectile', projectile);
+
+            attackT += ATTACK_INTERVAL;
+        }
+    }
+
     if (!Vector2.equal(playerPosition, playerPrevious))
         socket.emit('player_move', playerPosition);
 
@@ -229,6 +256,9 @@ function tick(t) {
     context.arc(playerPos.x, playerPos.y, playerRadiusScreenSpace, 0, 2 * Math.PI, false);
     context.fillStyle = PLAYER_COLOURS[playerColour];
     context.fill();
+
+    attackT -= deltaTime;
+    if (attackT < 0) attackT = 0;
 
     requestAnimationFrame(tick);
 }
