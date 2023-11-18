@@ -22,7 +22,7 @@ export class Projectile {
     }
 
     /**
-     * @param {number} deltaTime 
+     * @param {number} deltaTime
      */
     update(deltaTime) {
         this.head = Vector2.add(

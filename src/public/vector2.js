@@ -57,7 +57,7 @@ export class Vector2 {
 
     get normalized() {
         const magnitude = this.magnitude;
-    
+
         return new Vector2(this.x / magnitude, this.y / magnitude);
     }
 
