@@ -27,7 +27,7 @@ export class Projectile {
     update(deltaTime) {
         this.head = Vector2.add(
             this.head,
-            Vector2.multiplyScalar(this.direction, this.speed * deltaTime)
+            Vector2.multiplyScalar(this.direction, this.speed / 5 * deltaTime)
         );
 
         // TODO: These boundaries are hard-coded
@@ -38,7 +38,7 @@ export class Projectile {
 
         this.tail = Vector2.subtract(
             this.head,
-            Vector2.multiplyScalar(this.direction, 2)
+            Vector2.multiplyScalar(this.direction, 10)
         );
 
         if (this.#isTailPastOrigin()) this.tail = this.origin;
