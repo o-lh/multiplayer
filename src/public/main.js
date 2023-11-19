@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from './uuid/index.js';
 
+import { Physics } from './physics.js';
 import { Projectile } from './projectile.js';
 import { Vector2 } from './vector2.js';
 
@@ -204,7 +205,7 @@ function tick(t) {
                     Vector2.multiplyScalar(direction, PLAYER_RADIUS)
                 ),
                 direction,
-                50,
+                5/*0*/,
                 structuredClone(playerPosition),
                 structuredClone(playerPosition)
             );
@@ -228,6 +229,22 @@ function tick(t) {
         if (projectiles[i].destroyed) {
             projectiles.splice(i, 1);
             continue;
+        }
+
+        if (otherPlayers[0]) {
+            let point = Physics.lineCircleCollision(
+                projectiles[i].tail,
+                projectiles[i].head,
+                otherPlayers[0].position,
+                PLAYER_RADIUS
+            );
+
+            point = worldSpacePointToScreenSpace(point);
+
+            context.beginPath();
+            context.arc(point.x, point.y, playerRadiusScreenSpace / 2, 0, 2 * Math.PI, false);
+            context.fillStyle = PLAYER_COLOURS[playerColour];
+            context.fill();
         }
 
         const lineStart = worldSpacePointToScreenSpace(projectiles[i].tail);
