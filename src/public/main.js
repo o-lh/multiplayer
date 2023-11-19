@@ -52,7 +52,7 @@ let holdA = false;
 let holdS = false;
 let holdD = false;
 let holdAttack = false;
-const ATTACK_INTERVAL = 0;
+const ATTACK_INTERVAL = 0.2;
 let attackT = 0;
 
 const PLAYER_COLOURS = [
