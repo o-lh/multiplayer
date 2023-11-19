@@ -31,7 +31,7 @@ export class Projectile {
         );
 
         // TODO: These boundaries are hard-coded
-        if (this.head.y < -20 || this.head.x > 20 || this.head.y > 20 || this.head.x < -20) {
+        if (this.tail.y < -10 || this.tail.x > 10 || this.tail.y > 10 || this.tail.x < -10) {
             this.destroyed = true;
             return;
         }
