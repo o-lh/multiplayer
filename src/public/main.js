@@ -1,11 +1,9 @@
-import { Socket } from 'socket.io';
 import { v4 as uuidv4 } from './uuid/index.js';
 
 import { Physics } from './physics.js';
 import { Projectile } from './projectile.js';
 import { Vector2 } from './vector2.js';
 
-/** @type {Socket} */
 const socket = io();
 
 const CANVAS_WORLD_SPACE_WIDTH = 20;
