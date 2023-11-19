@@ -1,9 +1,11 @@
+import { Socket } from 'socket.io';
 import { v4 as uuidv4 } from './uuid/index.js';
 
 import { Physics } from './physics.js';
 import { Projectile } from './projectile.js';
 import { Vector2 } from './vector2.js';
 
+/** @type {Socket} */
 const socket = io();
 
 const CANVAS_WORLD_SPACE_WIDTH = 20;
@@ -28,6 +30,7 @@ function screenSpacePointToWorldSpace(point) {
     );
 }
 
+/** @type {HTMLCanvasElement} */
 const canvas = document.getElementById('canvas');
 const context = canvas.getContext('2d');
 let smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
@@ -117,7 +120,10 @@ addEventListener('mousemove', event => {
     mousePosition.y = event.y;
 });
 
+/** @type {Player[]} */
 const otherPlayers = [];
+
+/** @type {Projectile[]} */
 const projectiles = [];
 
 socket.on('player_connected', newPlayer => {

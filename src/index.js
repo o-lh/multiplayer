@@ -26,6 +26,7 @@ app.use('/uuid', express.static(join(__dirname, '..', 'node_modules', 'uuid', 'd
 // - https://socket.io/docs/v4/client-options/#auth
 // - https://socket.io/how-to/deal-with-cookies
 
+/** @type {Player[]} */
 const players = [];
 
 io.on('connection', (socket) => {
