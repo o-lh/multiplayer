@@ -7,18 +7,16 @@ export class Projectile {
      * @param {Vector2} origin
      * @param {Vector2} direction
      * @param {number} speed
-     * @param {Vector2} head
-     * @param {Vector2} tail
      */
-    constructor(id, owner, origin, direction, speed, head, tail) {
+    constructor(id, owner, origin, direction, speed) {
         this.id = id;
         this.destroyed = false;
         this.owner = owner;
         this.origin = origin;
         this.direction = direction;
         this.speed = speed;
-        this.head = head;
-        this.tail = tail;
+        this.head = origin;
+        this.tail = origin;
     }
 
     /**

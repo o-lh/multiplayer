@@ -209,9 +209,7 @@ function tick(t) {
                     Vector2.multiplyScalar(direction, PLAYER_RADIUS)
                 ),
                 direction,
-                5/*0*/,
-                structuredClone(playerPosition),
-                structuredClone(playerPosition)
+                50
             );
 
             // TODO: CreateNetworkObject function?
