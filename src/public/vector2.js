@@ -35,6 +35,14 @@ export class Vector2 {
     }
 
     /**
+     * @param {Vector2} vectorA
+     * @param {Vector2} vectorB
+     */
+    static dot(vectorA, vectorB) {
+        return vectorA.x * vectorB.x + vectorA.y * vectorB.y;
+    }
+
+    /**
      * @param {Vector2[]} vectors
      */
     static equal(...vectors) {
@@ -52,7 +60,7 @@ export class Vector2 {
     }
 
     get magnitude() {
-        return Math.sqrt(this.x ** 2 + this.y ** 2);
+        return Math.sqrt(this.sqrMagnitude);
     }
 
     get normalized() {
