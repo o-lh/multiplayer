@@ -233,22 +233,6 @@ function tick(t) {
             continue;
         }
 
-        if (otherPlayers[0]) {
-            let point = Physics.lineCircleCollision(
-                projectiles[i].tail,
-                projectiles[i].head,
-                otherPlayers[0].position,
-                PLAYER_RADIUS
-            );
-
-            point = worldSpacePointToScreenSpace(point);
-
-            context.beginPath();
-            context.arc(point.x, point.y, playerRadiusScreenSpace / 2, 0, 2 * Math.PI, false);
-            context.fillStyle = PLAYER_COLOURS[playerColour];
-            context.fill();
-        }
-
         const lineStart = worldSpacePointToScreenSpace(projectiles[i].tail);
         const lineEnd = worldSpacePointToScreenSpace(projectiles[i].head);
 
@@ -284,3 +268,5 @@ function tick(t) {
 
 // TODO: socket.id is undefined initially. Perhaps only start once it is defined?
 requestAnimationFrame(tick);
+
+// TODO: Untie game logic from frame rate
