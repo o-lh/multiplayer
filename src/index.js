@@ -54,7 +54,13 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('player_change_colour', socket.id, colour);
     });
 
-    socket.on('create_projectile', projectile => socket.broadcast.emit('create_projectile', projectile));
+    socket.on('create_projectile', projectile => {
+        socket.broadcast.emit('create_projectile', projectile);
+    });
+
+    socket.on('projectile_hit', (projectileID, targetID) => {
+        socket.broadcast.emit('projectile_hit', projectileID, targetID);
+    });
 
     socket.on('disconnect', () => {
         const index = players.findIndex(player => player.id === socket.id);

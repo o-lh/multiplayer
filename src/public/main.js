@@ -151,6 +151,11 @@ socket.on('create_projectile', projectile => {
     ));
 });
 
+socket.on('projectile_hit', (projectileID, targetID) => {
+    const projectileIndex = projectiles.findIndex(projectile => projectile.id === projectileID);
+    projectiles[projectileIndex].destroyed = true;
+});
+
 socket.on('player_disconnected', id => {
     const index = otherPlayers.findIndex(player => player.id === id);
     otherPlayers.splice(index, 1);
@@ -227,6 +232,20 @@ function tick(t) {
 
     for (let i = projectiles.length - 1; i >= 0; --i) {
         projectiles[i].update(deltaTime);
+
+        if (projectiles[i].owner === socket.id) {
+            for (const player of otherPlayers) {
+                if (Physics.lineCircleCollision(
+                    projectiles[i].tail,
+                    projectiles[i].head,
+                    player.position,
+                    PLAYER_RADIUS
+                )) {
+                    socket.emit('projectile_hit', projectiles[i].id, player.id);
+                    projectiles[i].destroyed = true;
+                }
+            }
+        }
 
         if (projectiles[i].destroyed) {
             projectiles.splice(i, 1);
