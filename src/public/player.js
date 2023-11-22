@@ -8,5 +8,6 @@ export class Player {
         this.id = id;
         this.position = position;
         this.colour = colour;
+        this.hitsTaken = 0;
     }
 }

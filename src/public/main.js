@@ -35,6 +35,9 @@ let smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
 canvas.width = smallerDimension;
 canvas.height = smallerDimension;
 
+context.font = '20px sans-serif';
+context.textAlign = 'center';
+
 const PLAYER_RADIUS = 0.25;
 let playerRadiusScreenSpace = worldSpaceLengthToScreenSpace(PLAYER_RADIUS);
 
@@ -44,6 +47,9 @@ addEventListener('resize', _ => {
     smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
     canvas.width = smallerDimension;
     canvas.height = smallerDimension;
+
+    context.font = '20px sans-serif';
+    context.textAlign = 'center';
 
     playerRadiusScreenSpace = worldSpaceLengthToScreenSpace(PLAYER_RADIUS);
 });
@@ -68,6 +74,7 @@ const PLAYER_COLOURS = [
 ];
 
 let playerColour = 0;
+let hitsTaken = 0;
 
 addEventListener('keydown', event => {
     if (event.repeat) return;
@@ -154,6 +161,13 @@ socket.on('create_projectile', projectile => {
 socket.on('projectile_hit', (projectileID, targetID) => {
     const projectileIndex = projectiles.findIndex(projectile => projectile.id === projectileID);
     projectiles[projectileIndex].destroyed = true;
+
+    if (targetID === socket.id) {
+        ++hitsTaken;
+    } else {
+        const index = otherPlayers.findIndex(player => player.id === targetID);
+        ++otherPlayers[index].hitsTaken;
+    }
 });
 
 socket.on('player_disconnected', id => {
@@ -243,6 +257,7 @@ function tick(t) {
                 )) {
                     socket.emit('projectile_hit', projectiles[i].id, player.id);
                     projectiles[i].destroyed = true;
+                    ++player.hitsTaken;
                 }
             }
         }
@@ -278,6 +293,15 @@ function tick(t) {
     context.arc(playerPos.x, playerPos.y, playerRadiusScreenSpace, 0, 2 * Math.PI, false);
     context.fillStyle = PLAYER_COLOURS[playerColour];
     context.fill();
+
+    for (const player of otherPlayers) {
+        const playerPos = worldSpacePointToScreenSpace(player.position);
+        context.fillStyle = PLAYER_COLOURS[player.colour];
+        context.fillText(player.hitsTaken, playerPos.x, playerPos.y - playerRadiusScreenSpace - 5);
+    }
+
+    context.fillStyle = PLAYER_COLOURS[playerColour];
+    context.fillText(hitsTaken, playerPos.x, playerPos.y - playerRadiusScreenSpace - 5);
 
     attackT -= deltaTime;
     if (attackT < 0) attackT = 0;
