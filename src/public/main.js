@@ -5,8 +5,6 @@ import { Projectile } from './projectile.js';
 import { Vector2 } from './vector2.js';
 import { Game } from './game.js';
 
-const socket = io();
-
 let smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
 Game.canvas.width = smallerDimension;
 Game.canvas.height = smallerDimension;
@@ -67,7 +65,7 @@ addEventListener('keydown', event => {
         case 'Space': {
             ++playerColour;
             if (playerColour >= PLAYER_COLOURS.length) playerColour = 0;
-            socket.emit('player_change_colour', playerColour);
+            Game.socket.emit('player_change_colour', playerColour);
             break;
         }
     }
@@ -107,21 +105,21 @@ const otherPlayers = [];
 /** @type {Projectile[]} */
 const projectiles = [];
 
-socket.on('player_connected', newPlayer => {
+Game.socket.on('player_connected', newPlayer => {
     otherPlayers.push(newPlayer);
 });
 
-socket.on('player_move', (id, position) => {
+Game.socket.on('player_move', (id, position) => {
     const index = otherPlayers.findIndex(player => player.id === id);
     otherPlayers[index].position = position;
 });
 
-socket.on('player_change_colour', (id, colour) => {
+Game.socket.on('player_change_colour', (id, colour) => {
     const index = otherPlayers.findIndex(player => player.id === id);
     otherPlayers[index].colour = colour;
 });
 
-socket.on('create_projectile', projectile => {
+Game.socket.on('create_projectile', projectile => {
     // TODO: Is there a better way to reconstruct these objects? Or not have to reconstruct them?
     projectiles.unshift(new Projectile(
         projectile.id,
@@ -134,11 +132,11 @@ socket.on('create_projectile', projectile => {
     ));
 });
 
-socket.on('projectile_hit', (projectileID, targetID) => {
+Game.socket.on('projectile_hit', (projectileID, targetID) => {
     const projectileIndex = projectiles.findIndex(projectile => projectile.id === projectileID);
     projectiles[projectileIndex].destroyed = true;
 
-    if (targetID === socket.id) {
+    if (targetID === Game.socket.id) {
         ++hitsTaken;
     } else {
         const index = otherPlayers.findIndex(player => player.id === targetID);
@@ -146,7 +144,7 @@ socket.on('projectile_hit', (projectileID, targetID) => {
     }
 });
 
-socket.on('player_disconnected', id => {
+Game.socket.on('player_disconnected', id => {
     const index = otherPlayers.findIndex(player => player.id === id);
     otherPlayers.splice(index, 1);
 });
@@ -159,7 +157,7 @@ let playerPosition = new Vector2(
 );
 
 // Set the player's initial position on the server
-socket.emit('player_move', playerPosition);
+Game.socket.emit('player_move', playerPosition);
 
 // TODO: Manage the deltaTime for the first frame properly (currently includes loading time)
 let prev = 0;
@@ -198,7 +196,7 @@ function tick(t) {
 
             const projectile = new Projectile(
                 uuidv4(),
-                socket.id,
+                Game.socket.id,
                 Vector2.add(
                     structuredClone(playerPosition),
                     Vector2.multiplyScalar(direction, PLAYER_RADIUS)
@@ -209,21 +207,21 @@ function tick(t) {
 
             // TODO: CreateNetworkObject function?
             projectiles.unshift(projectile);
-            socket.emit('create_projectile', projectile);
+            Game.socket.emit('create_projectile', projectile);
 
             attackT += ATTACK_INTERVAL;
         }
     }
 
     if (!Vector2.equal(playerPosition, playerPrevious))
-        socket.emit('player_move', playerPosition);
+        Game.socket.emit('player_move', playerPosition);
 
     Game.context.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
 
     for (let i = projectiles.length - 1; i >= 0; --i) {
         projectiles[i].update(deltaTime);
 
-        if (projectiles[i].owner === socket.id) {
+        if (projectiles[i].owner === Game.socket.id) {
             for (const player of otherPlayers) {
                 if (Physics.lineCircleCollision(
                     projectiles[i].tail,
@@ -231,7 +229,7 @@ function tick(t) {
                     player.position,
                     PLAYER_RADIUS
                 )) {
-                    socket.emit('projectile_hit', projectiles[i].id, player.id);
+                    Game.socket.emit('projectile_hit', projectiles[i].id, player.id);
                     projectiles[i].destroyed = true;
                     ++player.hitsTaken;
                 }

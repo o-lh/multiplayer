@@ -2,6 +2,7 @@ import { Vector2 } from "./vector2.js";
 
 export class Game {
     // TODO: Begin the mess zone
+    static socket = io();
     static CANVAS_WORLD_SPACE_WIDTH = 20;
     static CANVAS_WORLD_SPACE_HEIGHT = 20;
     /** @type {HTMLCanvasElement} */
