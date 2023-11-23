@@ -7,13 +7,12 @@ import { Game } from './game.js';
 
 const socket = io();
 
-const context = Game.canvas.getContext('2d');
 let smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
 Game.canvas.width = smallerDimension;
 Game.canvas.height = smallerDimension;
 
-context.font = '20px sans-serif';
-context.textAlign = 'center';
+Game.context.font = '20px sans-serif';
+Game.context.textAlign = 'center';
 
 const PLAYER_RADIUS = 0.25;
 let playerRadiusScreenSpace = Game.worldSpaceLengthToScreenSpace(PLAYER_RADIUS);
@@ -25,8 +24,8 @@ addEventListener('resize', _ => {
     Game.canvas.width = smallerDimension;
     Game.canvas.height = smallerDimension;
 
-    context.font = '20px sans-serif';
-    context.textAlign = 'center';
+    Game.context.font = '20px sans-serif';
+    Game.context.textAlign = 'center';
 
     playerRadiusScreenSpace = Game.worldSpaceLengthToScreenSpace(PLAYER_RADIUS);
 });
@@ -219,7 +218,7 @@ function tick(t) {
     if (!Vector2.equal(playerPosition, playerPrevious))
         socket.emit('player_move', playerPosition);
 
-    context.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
+    Game.context.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
 
     for (let i = projectiles.length - 1; i >= 0; --i) {
         projectiles[i].update(deltaTime);
@@ -247,38 +246,38 @@ function tick(t) {
         const lineStart = Game.worldSpacePointToScreenSpace(projectiles[i].tail);
         const lineEnd = Game.worldSpacePointToScreenSpace(projectiles[i].head);
 
-        context.beginPath();
-        context.strokeStyle = 'rgb(255, 255, 255)';
-        context.lineWidth = 2;
-        context.moveTo(lineStart.x, lineStart.y);
-        context.lineTo(lineEnd.x, lineEnd.y);
-        context.stroke();
+        Game.context.beginPath();
+        Game.context.strokeStyle = 'rgb(255, 255, 255)';
+        Game.context.lineWidth = 2;
+        Game.context.moveTo(lineStart.x, lineStart.y);
+        Game.context.lineTo(lineEnd.x, lineEnd.y);
+        Game.context.stroke();
     }
 
     for (const player of otherPlayers) {
         const playerPos = Game.worldSpacePointToScreenSpace(player.position);
 
-        context.beginPath();
-        context.arc(playerPos.x, playerPos.y, playerRadiusScreenSpace, 0, 2 * Math.PI, false);
-        context.fillStyle = PLAYER_COLOURS[player.colour];
-        context.fill();
+        Game.context.beginPath();
+        Game.context.arc(playerPos.x, playerPos.y, playerRadiusScreenSpace, 0, 2 * Math.PI, false);
+        Game.context.fillStyle = PLAYER_COLOURS[player.colour];
+        Game.context.fill();
     }
 
     const playerPos = Game.worldSpacePointToScreenSpace(playerPosition);
 
-    context.beginPath();
-    context.arc(playerPos.x, playerPos.y, playerRadiusScreenSpace, 0, 2 * Math.PI, false);
-    context.fillStyle = PLAYER_COLOURS[playerColour];
-    context.fill();
+    Game.context.beginPath();
+    Game.context.arc(playerPos.x, playerPos.y, playerRadiusScreenSpace, 0, 2 * Math.PI, false);
+    Game.context.fillStyle = PLAYER_COLOURS[playerColour];
+    Game.context.fill();
 
     for (const player of otherPlayers) {
         const playerPos = Game.worldSpacePointToScreenSpace(player.position);
-        context.fillStyle = PLAYER_COLOURS[player.colour];
-        context.fillText(player.hitsTaken, playerPos.x, playerPos.y - playerRadiusScreenSpace - 5);
+        Game.context.fillStyle = PLAYER_COLOURS[player.colour];
+        Game.context.fillText(player.hitsTaken, playerPos.x, playerPos.y - playerRadiusScreenSpace - 5);
     }
 
-    context.fillStyle = PLAYER_COLOURS[playerColour];
-    context.fillText(hitsTaken, playerPos.x, playerPos.y - playerRadiusScreenSpace - 5);
+    Game.context.fillStyle = PLAYER_COLOURS[playerColour];
+    Game.context.fillText(hitsTaken, playerPos.x, playerPos.y - playerRadiusScreenSpace - 5);
 
     attackT -= deltaTime;
     if (attackT < 0) attackT = 0;

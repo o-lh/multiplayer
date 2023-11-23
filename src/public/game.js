@@ -6,6 +6,7 @@ export class Game {
     static CANVAS_WORLD_SPACE_HEIGHT = 20;
     /** @type {HTMLCanvasElement} */
     static canvas = document.getElementById('canvas');
+    static context = Game.canvas.getContext('2d');
 
     static worldSpacePointToScreenSpace(point) {
         return new Vector2(
