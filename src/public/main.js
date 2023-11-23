@@ -3,55 +3,32 @@ import { v4 as uuidv4 } from './uuid/index.js';
 import { Physics } from './physics.js';
 import { Projectile } from './projectile.js';
 import { Vector2 } from './vector2.js';
+import { Game } from './game.js';
 
 const socket = io();
 
-const CANVAS_WORLD_SPACE_WIDTH = 20;
-const CANVAS_WORLD_SPACE_HEIGHT = 20;
-
-function worldSpacePointToScreenSpace(point) {
-    return new Vector2(
-        canvas.width / 2 + point.x * canvas.width / CANVAS_WORLD_SPACE_WIDTH,
-        canvas.height / 2 + point.y * canvas.height / CANVAS_WORLD_SPACE_HEIGHT
-    );
-}
-
-// TODO: What about for a non-square canvas?
-function worldSpaceLengthToScreenSpace(length) {
-    return length * canvas.height / CANVAS_WORLD_SPACE_HEIGHT;
-}
-
-function screenSpacePointToWorldSpace(point) {
-    return new Vector2(
-        point.x / canvas.width * CANVAS_WORLD_SPACE_WIDTH - CANVAS_WORLD_SPACE_WIDTH / 2,
-        point.y / canvas.height * CANVAS_WORLD_SPACE_HEIGHT - CANVAS_WORLD_SPACE_HEIGHT / 2
-    );
-}
-
-/** @type {HTMLCanvasElement} */
-const canvas = document.getElementById('canvas');
-const context = canvas.getContext('2d');
+const context = Game.canvas.getContext('2d');
 let smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
-canvas.width = smallerDimension;
-canvas.height = smallerDimension;
+Game.canvas.width = smallerDimension;
+Game.canvas.height = smallerDimension;
 
 context.font = '20px sans-serif';
 context.textAlign = 'center';
 
 const PLAYER_RADIUS = 0.25;
-let playerRadiusScreenSpace = worldSpaceLengthToScreenSpace(PLAYER_RADIUS);
+let playerRadiusScreenSpace = Game.worldSpaceLengthToScreenSpace(PLAYER_RADIUS);
 
 addEventListener('contextmenu', event => event.preventDefault());
 
 addEventListener('resize', _ => {
     smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
-    canvas.width = smallerDimension;
-    canvas.height = smallerDimension;
+    Game.canvas.width = smallerDimension;
+    Game.canvas.height = smallerDimension;
 
     context.font = '20px sans-serif';
     context.textAlign = 'center';
 
-    playerRadiusScreenSpace = worldSpaceLengthToScreenSpace(PLAYER_RADIUS);
+    playerRadiusScreenSpace = Game.worldSpaceLengthToScreenSpace(PLAYER_RADIUS);
 });
 
 let mousePosition = new Vector2();
@@ -178,8 +155,8 @@ socket.on('player_disconnected', id => {
 const PLAYER_SPEED = 4;
 let playerPrevious = new Vector2();
 let playerPosition = new Vector2(
-    (Math.random() * CANVAS_WORLD_SPACE_WIDTH) - CANVAS_WORLD_SPACE_WIDTH / 2,
-    (Math.random() * CANVAS_WORLD_SPACE_HEIGHT) - CANVAS_WORLD_SPACE_HEIGHT / 2
+    (Math.random() * Game.CANVAS_WORLD_SPACE_WIDTH) - Game.CANVAS_WORLD_SPACE_WIDTH / 2,
+    (Math.random() * Game.CANVAS_WORLD_SPACE_HEIGHT) - Game.CANVAS_WORLD_SPACE_HEIGHT / 2
 );
 
 // Set the player's initial position on the server
@@ -200,21 +177,21 @@ function tick(t) {
     if (holdS) playerPosition.y += PLAYER_SPEED * deltaTime;
     if (holdA) playerPosition.x -= PLAYER_SPEED * deltaTime;
 
-    if (playerPosition.y - PLAYER_RADIUS < -CANVAS_WORLD_SPACE_HEIGHT / 2)
-        playerPosition.y = -CANVAS_WORLD_SPACE_HEIGHT / 2 + PLAYER_RADIUS;
-    if (playerPosition.x + PLAYER_RADIUS > CANVAS_WORLD_SPACE_WIDTH / 2)
-        playerPosition.x = CANVAS_WORLD_SPACE_WIDTH / 2 - PLAYER_RADIUS;
-    if (playerPosition.y + PLAYER_RADIUS > CANVAS_WORLD_SPACE_HEIGHT / 2)
-        playerPosition.y = CANVAS_WORLD_SPACE_HEIGHT / 2 - PLAYER_RADIUS;
-    if (playerPosition.x - PLAYER_RADIUS < -CANVAS_WORLD_SPACE_WIDTH / 2)
-        playerPosition.x = -CANVAS_WORLD_SPACE_WIDTH / 2 + PLAYER_RADIUS;
+    if (playerPosition.y - PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
+        playerPosition.y = -Game.CANVAS_WORLD_SPACE_HEIGHT / 2 + PLAYER_RADIUS;
+    if (playerPosition.x + PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_WIDTH / 2)
+        playerPosition.x = Game.CANVAS_WORLD_SPACE_WIDTH / 2 - PLAYER_RADIUS;
+    if (playerPosition.y + PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
+        playerPosition.y = Game.CANVAS_WORLD_SPACE_HEIGHT / 2 - PLAYER_RADIUS;
+    if (playerPosition.x - PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_WIDTH / 2)
+        playerPosition.x = -Game.CANVAS_WORLD_SPACE_WIDTH / 2 + PLAYER_RADIUS;
 
     if (holdAttack) {
         if (attackT <= 0) {
-            const clickPosition = screenSpacePointToWorldSpace(
+            const clickPosition = Game.screenSpacePointToWorldSpace(
                 new Vector2(
-                    mousePosition.x - canvas.offsetLeft,
-                    mousePosition.y - canvas.offsetTop
+                    mousePosition.x - Game.canvas.offsetLeft,
+                    mousePosition.y - Game.canvas.offsetTop
                 )
             );
 
@@ -242,7 +219,7 @@ function tick(t) {
     if (!Vector2.equal(playerPosition, playerPrevious))
         socket.emit('player_move', playerPosition);
 
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
 
     for (let i = projectiles.length - 1; i >= 0; --i) {
         projectiles[i].update(deltaTime);
@@ -267,8 +244,8 @@ function tick(t) {
             continue;
         }
 
-        const lineStart = worldSpacePointToScreenSpace(projectiles[i].tail);
-        const lineEnd = worldSpacePointToScreenSpace(projectiles[i].head);
+        const lineStart = Game.worldSpacePointToScreenSpace(projectiles[i].tail);
+        const lineEnd = Game.worldSpacePointToScreenSpace(projectiles[i].head);
 
         context.beginPath();
         context.strokeStyle = 'rgb(255, 255, 255)';
@@ -279,7 +256,7 @@ function tick(t) {
     }
 
     for (const player of otherPlayers) {
-        const playerPos = worldSpacePointToScreenSpace(player.position);
+        const playerPos = Game.worldSpacePointToScreenSpace(player.position);
 
         context.beginPath();
         context.arc(playerPos.x, playerPos.y, playerRadiusScreenSpace, 0, 2 * Math.PI, false);
@@ -287,7 +264,7 @@ function tick(t) {
         context.fill();
     }
 
-    const playerPos = worldSpacePointToScreenSpace(playerPosition);
+    const playerPos = Game.worldSpacePointToScreenSpace(playerPosition);
 
     context.beginPath();
     context.arc(playerPos.x, playerPos.y, playerRadiusScreenSpace, 0, 2 * Math.PI, false);
@@ -295,7 +272,7 @@ function tick(t) {
     context.fill();
 
     for (const player of otherPlayers) {
-        const playerPos = worldSpacePointToScreenSpace(player.position);
+        const playerPos = Game.worldSpacePointToScreenSpace(player.position);
         context.fillStyle = PLAYER_COLOURS[player.colour];
         context.fillText(player.hitsTaken, playerPos.x, playerPos.y - playerRadiusScreenSpace - 5);
     }
