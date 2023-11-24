@@ -11,6 +11,14 @@ export class Game {
     static smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
     static PLAYER_RADIUS = 0.25;
     static playerRadiusScreenSpace;
+    static mousePosition = new Vector2();
+    static holdW = false;
+    static holdA = false;
+    static holdS = false;
+    static holdD = false;
+    static holdAttack = false;
+    static ATTACK_INTERVAL = 0.2;
+    static attackT = 0;
 
     static worldSpacePointToScreenSpace(point) {
         return new Vector2(
@@ -43,6 +51,19 @@ export class Game {
         Game.context.textAlign = 'center';
 
         Game.playerRadiusScreenSpace = Game.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS);
+
+        addEventListener('contextmenu', event => event.preventDefault());
+
+        addEventListener('resize', _ => {
+            Game.smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
+            Game.canvas.width = Game.smallerDimension;
+            Game.canvas.height = Game.smallerDimension;
+
+            Game.context.font = '20px sans-serif';
+            Game.context.textAlign = 'center';
+
+            Game.playerRadiusScreenSpace = Game.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS);
+        });
 
         // requestAnimationFrame(Game.#update);
     }

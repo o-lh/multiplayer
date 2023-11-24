@@ -7,28 +7,6 @@ import { Game } from './game.js';
 
 Game.run();
 
-addEventListener('contextmenu', event => event.preventDefault());
-
-addEventListener('resize', _ => {
-    Game.smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
-    Game.canvas.width = Game.smallerDimension;
-    Game.canvas.height = Game.smallerDimension;
-
-    Game.context.font = '20px sans-serif';
-    Game.context.textAlign = 'center';
-
-    Game.playerRadiusScreenSpace = Game.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS);
-});
-
-let mousePosition = new Vector2();
-let holdW = false;
-let holdA = false;
-let holdS = false;
-let holdD = false;
-let holdAttack = false;
-const ATTACK_INTERVAL = 0.2;
-let attackT = 0;
-
 const PLAYER_COLOURS = [
     'rgb(255, 0, 0)',
     'rgb(255, 128, 0)',
@@ -46,14 +24,14 @@ addEventListener('keydown', event => {
     if (event.repeat) return;
 
     switch (event.code) {
-        case 'KeyW': holdW = true; break;
-        case 'KeyA': holdA = true; break;
-        case 'KeyS': holdS = true; break;
-        case 'KeyD': holdD = true; break;
-        case 'ArrowUp': holdW = true; break;
-        case 'ArrowLeft': holdA = true; break;
-        case 'ArrowDown': holdS = true; break;
-        case 'ArrowRight': holdD = true; break;
+        case 'KeyW': Game.holdW = true; break;
+        case 'KeyA': Game.holdA = true; break;
+        case 'KeyS': Game.holdS = true; break;
+        case 'KeyD': Game.holdD = true; break;
+        case 'ArrowUp': Game.holdW = true; break;
+        case 'ArrowLeft': Game.holdA = true; break;
+        case 'ArrowDown': Game.holdS = true; break;
+        case 'ArrowRight': Game.holdD = true; break;
         case 'Space': {
             ++playerColour;
             if (playerColour >= PLAYER_COLOURS.length) playerColour = 0;
@@ -65,30 +43,30 @@ addEventListener('keydown', event => {
 
 addEventListener('keyup', event => {
     switch (event.code) {
-        case 'KeyW': holdW = false; break;
-        case 'KeyA': holdA = false; break;
-        case 'KeyS': holdS = false; break;
-        case 'KeyD': holdD = false; break;
-        case 'ArrowUp': holdW = false; break;
-        case 'ArrowLeft': holdA = false; break;
-        case 'ArrowDown': holdS = false; break;
-        case 'ArrowRight': holdD = false; break;
+        case 'KeyW': Game.holdW = false; break;
+        case 'KeyA': Game.holdA = false; break;
+        case 'KeyS': Game.holdS = false; break;
+        case 'KeyD': Game.holdD = false; break;
+        case 'ArrowUp': Game.holdW = false; break;
+        case 'ArrowLeft': Game.holdA = false; break;
+        case 'ArrowDown': Game.holdS = false; break;
+        case 'ArrowRight': Game.holdD = false; break;
     }
 });
 
 addEventListener('mousedown', event => {
     if (event.button !== 0) return;
 
-    holdAttack = true;
-    mousePosition.x = event.x;
-    mousePosition.y = event.y;
+    Game.holdAttack = true;
+    Game.mousePosition.x = event.x;
+    Game.mousePosition.y = event.y;
 });
 
-addEventListener('mouseup', event => { if (event.button === 0) holdAttack = false; });
+addEventListener('mouseup', event => { if (event.button === 0) Game.holdAttack = false; });
 
 addEventListener('mousemove', event => {
-    mousePosition.x = event.x;
-    mousePosition.y = event.y;
+    Game.mousePosition.x = event.x;
+    Game.mousePosition.y = event.y;
 });
 
 /** @type {Player[]} */
@@ -161,10 +139,10 @@ function tick(t) {
 
     playerPrevious = structuredClone(playerPosition);
 
-    if (holdW) playerPosition.y -= PLAYER_SPEED * deltaTime;
-    if (holdD) playerPosition.x += PLAYER_SPEED * deltaTime;
-    if (holdS) playerPosition.y += PLAYER_SPEED * deltaTime;
-    if (holdA) playerPosition.x -= PLAYER_SPEED * deltaTime;
+    if (Game.holdW) playerPosition.y -= PLAYER_SPEED * deltaTime;
+    if (Game.holdD) playerPosition.x += PLAYER_SPEED * deltaTime;
+    if (Game.holdS) playerPosition.y += PLAYER_SPEED * deltaTime;
+    if (Game.holdA) playerPosition.x -= PLAYER_SPEED * deltaTime;
 
     if (playerPosition.y - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
         playerPosition.y = -Game.CANVAS_WORLD_SPACE_HEIGHT / 2 + Game.PLAYER_RADIUS;
@@ -175,8 +153,8 @@ function tick(t) {
     if (playerPosition.x - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_WIDTH / 2)
         playerPosition.x = -Game.CANVAS_WORLD_SPACE_WIDTH / 2 + Game.PLAYER_RADIUS;
 
-    if (holdAttack) {
-        if (attackT <= 0) {
+    if (Game.holdAttack) {
+        if (Game.attackT <= 0) {
             const clickPosition = Game.screenSpacePointToWorldSpace(
                 new Vector2(
                     mousePosition.x - Game.canvas.offsetLeft,
@@ -201,7 +179,7 @@ function tick(t) {
             projectiles.unshift(projectile);
             Game.socket.emit('create_projectile', projectile);
 
-            attackT += ATTACK_INTERVAL;
+            Game.attackT += Game.ATTACK_INTERVAL;
         }
     }
 
@@ -269,8 +247,8 @@ function tick(t) {
     Game.context.fillStyle = PLAYER_COLOURS[playerColour];
     Game.context.fillText(hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
 
-    attackT -= deltaTime;
-    if (attackT < 0) attackT = 0;
+    Game.attackT -= deltaTime;
+    if (Game.attackT < 0) Game.attackT = 0;
 
     requestAnimationFrame(tick);
 }
