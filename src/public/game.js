@@ -8,6 +8,9 @@ export class Game {
     /** @type {HTMLCanvasElement} */
     static canvas = document.getElementById('canvas');
     static context = Game.canvas.getContext('2d');
+    static smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
+    static PLAYER_RADIUS = 0.25;
+    static playerRadiusScreenSpace;
 
     static worldSpacePointToScreenSpace(point) {
         return new Vector2(
@@ -33,7 +36,15 @@ export class Game {
     static #prev = 0;
 
     static run() {
-        requestAnimationFrame(Game.#update);
+        Game.canvas.width = Game.smallerDimension;
+        Game.canvas.height = Game.smallerDimension;
+
+        Game.context.font = '20px sans-serif';
+        Game.context.textAlign = 'center';
+
+        Game.playerRadiusScreenSpace = Game.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS);
+
+        // requestAnimationFrame(Game.#update);
     }
 
     static #update(t) {

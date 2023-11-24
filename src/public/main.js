@@ -5,27 +5,19 @@ import { Projectile } from './projectile.js';
 import { Vector2 } from './vector2.js';
 import { Game } from './game.js';
 
-let smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
-Game.canvas.width = smallerDimension;
-Game.canvas.height = smallerDimension;
-
-Game.context.font = '20px sans-serif';
-Game.context.textAlign = 'center';
-
-const PLAYER_RADIUS = 0.25;
-let playerRadiusScreenSpace = Game.worldSpaceLengthToScreenSpace(PLAYER_RADIUS);
+Game.run();
 
 addEventListener('contextmenu', event => event.preventDefault());
 
 addEventListener('resize', _ => {
-    smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
-    Game.canvas.width = smallerDimension;
-    Game.canvas.height = smallerDimension;
+    Game.smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
+    Game.canvas.width = Game.smallerDimension;
+    Game.canvas.height = Game.smallerDimension;
 
     Game.context.font = '20px sans-serif';
     Game.context.textAlign = 'center';
 
-    playerRadiusScreenSpace = Game.worldSpaceLengthToScreenSpace(PLAYER_RADIUS);
+    Game.playerRadiusScreenSpace = Game.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS);
 });
 
 let mousePosition = new Vector2();
@@ -174,14 +166,14 @@ function tick(t) {
     if (holdS) playerPosition.y += PLAYER_SPEED * deltaTime;
     if (holdA) playerPosition.x -= PLAYER_SPEED * deltaTime;
 
-    if (playerPosition.y - PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
-        playerPosition.y = -Game.CANVAS_WORLD_SPACE_HEIGHT / 2 + PLAYER_RADIUS;
-    if (playerPosition.x + PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_WIDTH / 2)
-        playerPosition.x = Game.CANVAS_WORLD_SPACE_WIDTH / 2 - PLAYER_RADIUS;
-    if (playerPosition.y + PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
-        playerPosition.y = Game.CANVAS_WORLD_SPACE_HEIGHT / 2 - PLAYER_RADIUS;
-    if (playerPosition.x - PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_WIDTH / 2)
-        playerPosition.x = -Game.CANVAS_WORLD_SPACE_WIDTH / 2 + PLAYER_RADIUS;
+    if (playerPosition.y - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
+        playerPosition.y = -Game.CANVAS_WORLD_SPACE_HEIGHT / 2 + Game.PLAYER_RADIUS;
+    if (playerPosition.x + Game.PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_WIDTH / 2)
+        playerPosition.x = Game.CANVAS_WORLD_SPACE_WIDTH / 2 - Game.PLAYER_RADIUS;
+    if (playerPosition.y + Game.PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
+        playerPosition.y = Game.CANVAS_WORLD_SPACE_HEIGHT / 2 - Game.PLAYER_RADIUS;
+    if (playerPosition.x - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_WIDTH / 2)
+        playerPosition.x = -Game.CANVAS_WORLD_SPACE_WIDTH / 2 + Game.PLAYER_RADIUS;
 
     if (holdAttack) {
         if (attackT <= 0) {
@@ -199,7 +191,7 @@ function tick(t) {
                 Game.socket.id,
                 Vector2.add(
                     structuredClone(playerPosition),
-                    Vector2.multiplyScalar(direction, PLAYER_RADIUS)
+                    Vector2.multiplyScalar(direction, Game.PLAYER_RADIUS)
                 ),
                 direction,
                 50
@@ -227,7 +219,7 @@ function tick(t) {
                     projectiles[i].tail,
                     projectiles[i].head,
                     player.position,
-                    PLAYER_RADIUS
+                    Game.PLAYER_RADIUS
                 )) {
                     Game.socket.emit('projectile_hit', projectiles[i].id, player.id);
                     projectiles[i].destroyed = true;
@@ -256,7 +248,7 @@ function tick(t) {
         const playerPos = Game.worldSpacePointToScreenSpace(player.position);
 
         Game.context.beginPath();
-        Game.context.arc(playerPos.x, playerPos.y, playerRadiusScreenSpace, 0, 2 * Math.PI, false);
+        Game.context.arc(playerPos.x, playerPos.y, Game.playerRadiusScreenSpace, 0, 2 * Math.PI, false);
         Game.context.fillStyle = PLAYER_COLOURS[player.colour];
         Game.context.fill();
     }
@@ -264,18 +256,18 @@ function tick(t) {
     const playerPos = Game.worldSpacePointToScreenSpace(playerPosition);
 
     Game.context.beginPath();
-    Game.context.arc(playerPos.x, playerPos.y, playerRadiusScreenSpace, 0, 2 * Math.PI, false);
+    Game.context.arc(playerPos.x, playerPos.y, Game.playerRadiusScreenSpace, 0, 2 * Math.PI, false);
     Game.context.fillStyle = PLAYER_COLOURS[playerColour];
     Game.context.fill();
 
     for (const player of otherPlayers) {
         const playerPos = Game.worldSpacePointToScreenSpace(player.position);
         Game.context.fillStyle = PLAYER_COLOURS[player.colour];
-        Game.context.fillText(player.hitsTaken, playerPos.x, playerPos.y - playerRadiusScreenSpace - 5);
+        Game.context.fillText(player.hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
     }
 
     Game.context.fillStyle = PLAYER_COLOURS[playerColour];
-    Game.context.fillText(hitsTaken, playerPos.x, playerPos.y - playerRadiusScreenSpace - 5);
+    Game.context.fillText(hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
 
     attackT -= deltaTime;
     if (attackT < 0) attackT = 0;
