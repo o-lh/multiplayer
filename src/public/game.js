@@ -10,6 +10,7 @@ export class Game {
     static context = Game.canvas.getContext('2d');
     static smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
     static PLAYER_RADIUS = 0.25;
+    /** @type {number} */
     static playerRadiusScreenSpace;
     static mousePosition = new Vector2();
     static holdW = false;
@@ -30,6 +31,16 @@ export class Game {
     ];
     static playerColour = 0;
     static hitsTaken = 0;
+    /** @type {Player[]} */
+    static otherPlayers = [];
+    /** @type {Projectile[]} */
+    static projectiles = [];
+    static PLAYER_SPEED = 4;
+    static playerPrevious = new Vector2();
+    static playerPosition = new Vector2(
+        (Math.random() * Game.CANVAS_WORLD_SPACE_WIDTH) - Game.CANVAS_WORLD_SPACE_WIDTH / 2,
+        (Math.random() * Game.CANVAS_WORLD_SPACE_HEIGHT) - Game.CANVAS_WORLD_SPACE_HEIGHT / 2
+    );
 
     static worldSpacePointToScreenSpace(point) {
         return new Vector2(

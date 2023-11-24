@@ -7,29 +7,23 @@ import { Game } from './game.js';
 
 Game.run();
 
-/** @type {Player[]} */
-const otherPlayers = [];
-
-/** @type {Projectile[]} */
-const projectiles = [];
-
 Game.socket.on('player_connected', newPlayer => {
-    otherPlayers.push(newPlayer);
+    Game.otherPlayers.push(newPlayer);
 });
 
 Game.socket.on('player_move', (id, position) => {
-    const index = otherPlayers.findIndex(player => player.id === id);
-    otherPlayers[index].position = position;
+    const index = Game.otherPlayers.findIndex(player => player.id === id);
+    Game.otherPlayers[index].position = position;
 });
 
 Game.socket.on('player_change_colour', (id, colour) => {
-    const index = otherPlayers.findIndex(player => player.id === id);
-    otherPlayers[index].colour = colour;
+    const index = Game.otherPlayers.findIndex(player => player.id === id);
+    Game.otherPlayers[index].colour = colour;
 });
 
 Game.socket.on('create_projectile', projectile => {
     // TODO: Is there a better way to reconstruct these objects? Or not have to reconstruct them?
-    projectiles.unshift(new Projectile(
+    Game.projectiles.unshift(new Projectile(
         projectile.id,
         projectile.owner,
         projectile.origin,
@@ -41,31 +35,24 @@ Game.socket.on('create_projectile', projectile => {
 });
 
 Game.socket.on('projectile_hit', (projectileID, targetID) => {
-    const projectileIndex = projectiles.findIndex(projectile => projectile.id === projectileID);
-    projectiles[projectileIndex].destroyed = true;
+    const projectileIndex = Game.projectiles.findIndex(projectile => projectile.id === projectileID);
+    Game.projectiles[projectileIndex].destroyed = true;
 
     if (targetID === Game.socket.id) {
         ++Game.hitsTaken;
     } else {
-        const index = otherPlayers.findIndex(player => player.id === targetID);
-        ++otherPlayers[index].hitsTaken;
+        const index = Game.otherPlayers.findIndex(player => player.id === targetID);
+        ++Game.otherPlayers[index].hitsTaken;
     }
 });
 
 Game.socket.on('player_disconnected', id => {
-    const index = otherPlayers.findIndex(player => player.id === id);
-    otherPlayers.splice(index, 1);
+    const index = Game.otherPlayers.findIndex(player => player.id === id);
+    Game.otherPlayers.splice(index, 1);
 });
 
-const PLAYER_SPEED = 4;
-let playerPrevious = new Vector2();
-let playerPosition = new Vector2(
-    (Math.random() * Game.CANVAS_WORLD_SPACE_WIDTH) - Game.CANVAS_WORLD_SPACE_WIDTH / 2,
-    (Math.random() * Game.CANVAS_WORLD_SPACE_HEIGHT) - Game.CANVAS_WORLD_SPACE_HEIGHT / 2
-);
-
 // Set the player's initial position on the server
-Game.socket.emit('player_move', playerPosition);
+Game.socket.emit('player_move', Game.playerPosition);
 
 // TODO: Manage the deltaTime for the first frame properly (currently includes loading time)
 let prev = 0;
@@ -75,21 +62,21 @@ function tick(t) {
     deltaTime = (t - prev) / 1000;
     prev = t;
 
-    playerPrevious = structuredClone(playerPosition);
+    Game.playerPrevious = structuredClone(Game.playerPosition);
 
-    if (Game.holdW) playerPosition.y -= PLAYER_SPEED * deltaTime;
-    if (Game.holdD) playerPosition.x += PLAYER_SPEED * deltaTime;
-    if (Game.holdS) playerPosition.y += PLAYER_SPEED * deltaTime;
-    if (Game.holdA) playerPosition.x -= PLAYER_SPEED * deltaTime;
+    if (Game.holdW) Game.playerPosition.y -= Game.PLAYER_SPEED * deltaTime;
+    if (Game.holdD) Game.playerPosition.x += Game.PLAYER_SPEED * deltaTime;
+    if (Game.holdS) Game.playerPosition.y += Game.PLAYER_SPEED * deltaTime;
+    if (Game.holdA) Game.playerPosition.x -= Game.PLAYER_SPEED * deltaTime;
 
-    if (playerPosition.y - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
-        playerPosition.y = -Game.CANVAS_WORLD_SPACE_HEIGHT / 2 + Game.PLAYER_RADIUS;
-    if (playerPosition.x + Game.PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_WIDTH / 2)
-        playerPosition.x = Game.CANVAS_WORLD_SPACE_WIDTH / 2 - Game.PLAYER_RADIUS;
-    if (playerPosition.y + Game.PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
-        playerPosition.y = Game.CANVAS_WORLD_SPACE_HEIGHT / 2 - Game.PLAYER_RADIUS;
-    if (playerPosition.x - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_WIDTH / 2)
-        playerPosition.x = -Game.CANVAS_WORLD_SPACE_WIDTH / 2 + Game.PLAYER_RADIUS;
+    if (Game.playerPosition.y - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
+        Game.playerPosition.y = -Game.CANVAS_WORLD_SPACE_HEIGHT / 2 + Game.PLAYER_RADIUS;
+    if (Game.playerPosition.x + Game.PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_WIDTH / 2)
+        Game.playerPosition.x = Game.CANVAS_WORLD_SPACE_WIDTH / 2 - Game.PLAYER_RADIUS;
+    if (Game.playerPosition.y + Game.PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
+        Game.playerPosition.y = Game.CANVAS_WORLD_SPACE_HEIGHT / 2 - Game.PLAYER_RADIUS;
+    if (Game.playerPosition.x - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_WIDTH / 2)
+        Game.playerPosition.x = -Game.CANVAS_WORLD_SPACE_WIDTH / 2 + Game.PLAYER_RADIUS;
 
     if (Game.holdAttack) {
         if (Game.attackT <= 0) {
@@ -100,13 +87,13 @@ function tick(t) {
                 )
             );
 
-            const direction = Vector2.subtract(clickPosition, playerPosition).normalized;
+            const direction = Vector2.subtract(clickPosition, Game.playerPosition).normalized;
 
             const projectile = new Projectile(
                 uuidv4(),
                 Game.socket.id,
                 Vector2.add(
-                    structuredClone(playerPosition),
+                    structuredClone(Game.playerPosition),
                     Vector2.multiplyScalar(direction, Game.PLAYER_RADIUS)
                 ),
                 direction,
@@ -114,43 +101,43 @@ function tick(t) {
             );
 
             // TODO: CreateNetworkObject function?
-            projectiles.unshift(projectile);
+            Game.projectiles.unshift(projectile);
             Game.socket.emit('create_projectile', projectile);
 
             Game.attackT += Game.ATTACK_INTERVAL;
         }
     }
 
-    if (!Vector2.equal(playerPosition, playerPrevious))
-        Game.socket.emit('player_move', playerPosition);
+    if (!Vector2.equal(Game.playerPosition, Game.playerPrevious))
+        Game.socket.emit('player_move', Game.playerPosition);
 
     Game.context.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
 
-    for (let i = projectiles.length - 1; i >= 0; --i) {
-        projectiles[i].update(deltaTime);
+    for (let i = Game.projectiles.length - 1; i >= 0; --i) {
+        Game.projectiles[i].update(deltaTime);
 
-        if (projectiles[i].owner === Game.socket.id) {
-            for (const player of otherPlayers) {
+        if (Game.projectiles[i].owner === Game.socket.id) {
+            for (const player of Game.otherPlayers) {
                 if (Physics.lineCircleCollision(
-                    projectiles[i].tail,
-                    projectiles[i].head,
+                    Game.projectiles[i].tail,
+                    Game.projectiles[i].head,
                     player.position,
                     Game.PLAYER_RADIUS
                 )) {
-                    Game.socket.emit('projectile_hit', projectiles[i].id, player.id);
-                    projectiles[i].destroyed = true;
+                    Game.socket.emit('projectile_hit', Game.projectiles[i].id, player.id);
+                    Game.projectiles[i].destroyed = true;
                     ++player.hitsTaken;
                 }
             }
         }
 
-        if (projectiles[i].destroyed) {
-            projectiles.splice(i, 1);
+        if (Game.projectiles[i].destroyed) {
+            Game.projectiles.splice(i, 1);
             continue;
         }
 
-        const lineStart = Game.worldSpacePointToScreenSpace(projectiles[i].tail);
-        const lineEnd = Game.worldSpacePointToScreenSpace(projectiles[i].head);
+        const lineStart = Game.worldSpacePointToScreenSpace(Game.projectiles[i].tail);
+        const lineEnd = Game.worldSpacePointToScreenSpace(Game.projectiles[i].head);
 
         Game.context.beginPath();
         Game.context.strokeStyle = 'rgb(255, 255, 255)';
@@ -160,7 +147,7 @@ function tick(t) {
         Game.context.stroke();
     }
 
-    for (const player of otherPlayers) {
+    for (const player of Game.otherPlayers) {
         const playerPos = Game.worldSpacePointToScreenSpace(player.position);
 
         Game.context.beginPath();
@@ -169,14 +156,14 @@ function tick(t) {
         Game.context.fill();
     }
 
-    const playerPos = Game.worldSpacePointToScreenSpace(playerPosition);
+    const playerPos = Game.worldSpacePointToScreenSpace(Game.playerPosition);
 
     Game.context.beginPath();
     Game.context.arc(playerPos.x, playerPos.y, Game.playerRadiusScreenSpace, 0, 2 * Math.PI, false);
     Game.context.fillStyle = Game.PLAYER_COLOURS[Game.playerColour];
     Game.context.fill();
 
-    for (const player of otherPlayers) {
+    for (const player of Game.otherPlayers) {
         const playerPos = Game.worldSpacePointToScreenSpace(player.position);
         Game.context.fillStyle = Game.PLAYER_COLOURS[player.colour];
         Game.context.fillText(player.hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
