@@ -7,53 +7,6 @@ import { Game } from './game.js';
 
 Game.run();
 
-Game.socket.on('player_connected', newPlayer => {
-    Game.otherPlayers.push(newPlayer);
-});
-
-Game.socket.on('player_move', (id, position) => {
-    const index = Game.otherPlayers.findIndex(player => player.id === id);
-    Game.otherPlayers[index].position = position;
-});
-
-Game.socket.on('player_change_colour', (id, colour) => {
-    const index = Game.otherPlayers.findIndex(player => player.id === id);
-    Game.otherPlayers[index].colour = colour;
-});
-
-Game.socket.on('create_projectile', projectile => {
-    // TODO: Is there a better way to reconstruct these objects? Or not have to reconstruct them?
-    Game.projectiles.unshift(new Projectile(
-        projectile.id,
-        projectile.owner,
-        projectile.origin,
-        projectile.direction,
-        projectile.speed,
-        projectile.head,
-        projectile.tail
-    ));
-});
-
-Game.socket.on('projectile_hit', (projectileID, targetID) => {
-    const projectileIndex = Game.projectiles.findIndex(projectile => projectile.id === projectileID);
-    Game.projectiles[projectileIndex].destroyed = true;
-
-    if (targetID === Game.socket.id) {
-        ++Game.hitsTaken;
-    } else {
-        const index = Game.otherPlayers.findIndex(player => player.id === targetID);
-        ++Game.otherPlayers[index].hitsTaken;
-    }
-});
-
-Game.socket.on('player_disconnected', id => {
-    const index = Game.otherPlayers.findIndex(player => player.id === id);
-    Game.otherPlayers.splice(index, 1);
-});
-
-// Set the player's initial position on the server
-Game.socket.emit('player_move', Game.playerPosition);
-
 // TODO: Manage the deltaTime for the first frame properly (currently includes loading time)
 let prev = 0;
 let deltaTime;
