@@ -7,68 +7,6 @@ import { Game } from './game.js';
 
 Game.run();
 
-const PLAYER_COLOURS = [
-    'rgb(255, 0, 0)',
-    'rgb(255, 128, 0)',
-    'rgb(255, 255, 0)',
-    'rgb(0, 255, 0)',
-    'rgb(0, 128, 255)',
-    'rgb(64, 0, 255)',
-    'rgb(192, 0, 255)'
-];
-
-let playerColour = 0;
-let hitsTaken = 0;
-
-addEventListener('keydown', event => {
-    if (event.repeat) return;
-
-    switch (event.code) {
-        case 'KeyW': Game.holdW = true; break;
-        case 'KeyA': Game.holdA = true; break;
-        case 'KeyS': Game.holdS = true; break;
-        case 'KeyD': Game.holdD = true; break;
-        case 'ArrowUp': Game.holdW = true; break;
-        case 'ArrowLeft': Game.holdA = true; break;
-        case 'ArrowDown': Game.holdS = true; break;
-        case 'ArrowRight': Game.holdD = true; break;
-        case 'Space': {
-            ++playerColour;
-            if (playerColour >= PLAYER_COLOURS.length) playerColour = 0;
-            Game.socket.emit('player_change_colour', playerColour);
-            break;
-        }
-    }
-});
-
-addEventListener('keyup', event => {
-    switch (event.code) {
-        case 'KeyW': Game.holdW = false; break;
-        case 'KeyA': Game.holdA = false; break;
-        case 'KeyS': Game.holdS = false; break;
-        case 'KeyD': Game.holdD = false; break;
-        case 'ArrowUp': Game.holdW = false; break;
-        case 'ArrowLeft': Game.holdA = false; break;
-        case 'ArrowDown': Game.holdS = false; break;
-        case 'ArrowRight': Game.holdD = false; break;
-    }
-});
-
-addEventListener('mousedown', event => {
-    if (event.button !== 0) return;
-
-    Game.holdAttack = true;
-    Game.mousePosition.x = event.x;
-    Game.mousePosition.y = event.y;
-});
-
-addEventListener('mouseup', event => { if (event.button === 0) Game.holdAttack = false; });
-
-addEventListener('mousemove', event => {
-    Game.mousePosition.x = event.x;
-    Game.mousePosition.y = event.y;
-});
-
 /** @type {Player[]} */
 const otherPlayers = [];
 
@@ -107,7 +45,7 @@ Game.socket.on('projectile_hit', (projectileID, targetID) => {
     projectiles[projectileIndex].destroyed = true;
 
     if (targetID === Game.socket.id) {
-        ++hitsTaken;
+        ++Game.hitsTaken;
     } else {
         const index = otherPlayers.findIndex(player => player.id === targetID);
         ++otherPlayers[index].hitsTaken;
@@ -157,8 +95,8 @@ function tick(t) {
         if (Game.attackT <= 0) {
             const clickPosition = Game.screenSpacePointToWorldSpace(
                 new Vector2(
-                    mousePosition.x - Game.canvas.offsetLeft,
-                    mousePosition.y - Game.canvas.offsetTop
+                    Game.mousePosition.x - Game.canvas.offsetLeft,
+                    Game.mousePosition.y - Game.canvas.offsetTop
                 )
             );
 
@@ -227,7 +165,7 @@ function tick(t) {
 
         Game.context.beginPath();
         Game.context.arc(playerPos.x, playerPos.y, Game.playerRadiusScreenSpace, 0, 2 * Math.PI, false);
-        Game.context.fillStyle = PLAYER_COLOURS[player.colour];
+        Game.context.fillStyle = Game.PLAYER_COLOURS[player.colour];
         Game.context.fill();
     }
 
@@ -235,17 +173,17 @@ function tick(t) {
 
     Game.context.beginPath();
     Game.context.arc(playerPos.x, playerPos.y, Game.playerRadiusScreenSpace, 0, 2 * Math.PI, false);
-    Game.context.fillStyle = PLAYER_COLOURS[playerColour];
+    Game.context.fillStyle = Game.PLAYER_COLOURS[Game.playerColour];
     Game.context.fill();
 
     for (const player of otherPlayers) {
         const playerPos = Game.worldSpacePointToScreenSpace(player.position);
-        Game.context.fillStyle = PLAYER_COLOURS[player.colour];
+        Game.context.fillStyle = Game.PLAYER_COLOURS[player.colour];
         Game.context.fillText(player.hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
     }
 
-    Game.context.fillStyle = PLAYER_COLOURS[playerColour];
-    Game.context.fillText(hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
+    Game.context.fillStyle = Game.PLAYER_COLOURS[Game.playerColour];
+    Game.context.fillText(Game.hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
 
     Game.attackT -= deltaTime;
     if (Game.attackT < 0) Game.attackT = 0;
