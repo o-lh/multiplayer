@@ -1,3 +1,6 @@
+import { v4 as uuidv4 } from './uuid/index.js';
+
+import { Physics } from './physics.js';
 import { Projectile } from "./projectile.js";
 import { Vector2 } from "./vector2.js";
 
@@ -63,7 +66,8 @@ export class Game {
     }
     // TODO: End the mess zone
 
-    static deltaTime = 0;
+    // TODO: Manage the deltaTime for the first frame properly (currently includes loading time)
+    static deltaTime;
     static #prev = 0;
 
     static run() {
@@ -184,13 +188,128 @@ export class Game {
         // Set the player's initial position on the server
         Game.socket.emit('player_move', Game.playerPosition);
 
-        // requestAnimationFrame(Game.#update);
+        // TODO: socket.id is undefined initially. Perhaps only start once it is defined?
+        requestAnimationFrame(Game.#update);
     }
 
     static #update(t) {
         Game.deltaTime = (t - Game.#prev) / 1000;
         Game.#prev = t;
 
+        Game.playerPrevious = structuredClone(Game.playerPosition);
+    
+        if (Game.holdW) Game.playerPosition.y -= Game.PLAYER_SPEED * Game.deltaTime;
+        if (Game.holdD) Game.playerPosition.x += Game.PLAYER_SPEED * Game.deltaTime;
+        if (Game.holdS) Game.playerPosition.y += Game.PLAYER_SPEED * Game.deltaTime;
+        if (Game.holdA) Game.playerPosition.x -= Game.PLAYER_SPEED * Game.deltaTime;
+    
+        if (Game.playerPosition.y - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
+            Game.playerPosition.y = -Game.CANVAS_WORLD_SPACE_HEIGHT / 2 + Game.PLAYER_RADIUS;
+        if (Game.playerPosition.x + Game.PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_WIDTH / 2)
+            Game.playerPosition.x = Game.CANVAS_WORLD_SPACE_WIDTH / 2 - Game.PLAYER_RADIUS;
+        if (Game.playerPosition.y + Game.PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
+            Game.playerPosition.y = Game.CANVAS_WORLD_SPACE_HEIGHT / 2 - Game.PLAYER_RADIUS;
+        if (Game.playerPosition.x - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_WIDTH / 2)
+            Game.playerPosition.x = -Game.CANVAS_WORLD_SPACE_WIDTH / 2 + Game.PLAYER_RADIUS;
+    
+        if (Game.holdAttack) {
+            if (Game.attackT <= 0) {
+                const clickPosition = Game.screenSpacePointToWorldSpace(
+                    new Vector2(
+                        Game.mousePosition.x - Game.canvas.offsetLeft,
+                        Game.mousePosition.y - Game.canvas.offsetTop
+                    )
+                );
+    
+                const direction = Vector2.subtract(clickPosition, Game.playerPosition).normalized;
+    
+                const projectile = new Projectile(
+                    uuidv4(),
+                    Game.socket.id,
+                    Vector2.add(
+                        structuredClone(Game.playerPosition),
+                        Vector2.multiplyScalar(direction, Game.PLAYER_RADIUS)
+                    ),
+                    direction,
+                    50
+                );
+    
+                // TODO: CreateNetworkObject function?
+                Game.projectiles.unshift(projectile);
+                Game.socket.emit('create_projectile', projectile);
+    
+                Game.attackT += Game.ATTACK_INTERVAL;
+            }
+        }
+    
+        if (!Vector2.equal(Game.playerPosition, Game.playerPrevious))
+            Game.socket.emit('player_move', Game.playerPosition);
+    
+        Game.context.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
+    
+        for (let i = Game.projectiles.length - 1; i >= 0; --i) {
+            Game.projectiles[i].update(Game.deltaTime);
+    
+            if (Game.projectiles[i].owner === Game.socket.id) {
+                for (const player of Game.otherPlayers) {
+                    if (Physics.lineCircleCollision(
+                        Game.projectiles[i].tail,
+                        Game.projectiles[i].head,
+                        player.position,
+                        Game.PLAYER_RADIUS
+                    )) {
+                        Game.socket.emit('projectile_hit', Game.projectiles[i].id, player.id);
+                        Game.projectiles[i].destroyed = true;
+                        ++player.hitsTaken;
+                    }
+                }
+            }
+    
+            if (Game.projectiles[i].destroyed) {
+                Game.projectiles.splice(i, 1);
+                continue;
+            }
+    
+            const lineStart = Game.worldSpacePointToScreenSpace(Game.projectiles[i].tail);
+            const lineEnd = Game.worldSpacePointToScreenSpace(Game.projectiles[i].head);
+    
+            Game.context.beginPath();
+            Game.context.strokeStyle = 'rgb(255, 255, 255)';
+            Game.context.lineWidth = 2;
+            Game.context.moveTo(lineStart.x, lineStart.y);
+            Game.context.lineTo(lineEnd.x, lineEnd.y);
+            Game.context.stroke();
+        }
+    
+        for (const player of Game.otherPlayers) {
+            const playerPos = Game.worldSpacePointToScreenSpace(player.position);
+    
+            Game.context.beginPath();
+            Game.context.arc(playerPos.x, playerPos.y, Game.playerRadiusScreenSpace, 0, 2 * Math.PI, false);
+            Game.context.fillStyle = Game.PLAYER_COLOURS[player.colour];
+            Game.context.fill();
+        }
+    
+        const playerPos = Game.worldSpacePointToScreenSpace(Game.playerPosition);
+    
+        Game.context.beginPath();
+        Game.context.arc(playerPos.x, playerPos.y, Game.playerRadiusScreenSpace, 0, 2 * Math.PI, false);
+        Game.context.fillStyle = Game.PLAYER_COLOURS[Game.playerColour];
+        Game.context.fill();
+    
+        for (const player of Game.otherPlayers) {
+            const playerPos = Game.worldSpacePointToScreenSpace(player.position);
+            Game.context.fillStyle = Game.PLAYER_COLOURS[player.colour];
+            Game.context.fillText(player.hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
+        }
+    
+        Game.context.fillStyle = Game.PLAYER_COLOURS[Game.playerColour];
+        Game.context.fillText(Game.hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
+    
+        Game.attackT -= Game.deltaTime;
+        if (Game.attackT < 0) Game.attackT = 0;
+
+        // TODO: Untie game logic from frame rate
         requestAnimationFrame(Game.#update);
     }
 }
