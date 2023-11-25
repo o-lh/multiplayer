@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from './uuid/index.js';
 
+import { Entity } from './entity.js';
 import { Physics } from './physics.js';
 import { Projectile } from "./projectile.js";
 import { Vector2 } from "./vector2.js";
@@ -66,6 +67,9 @@ export class Game {
     }
     // TODO: End the mess zone
 
+    /** @type {Entity[]} */
+    static entities = [];
+
     // TODO: Manage the deltaTime for the first frame properly (currently includes loading time)
     static deltaTime;
     static #prev = 0;
@@ -94,7 +98,7 @@ export class Game {
 
         addEventListener('keydown', event => {
             if (event.repeat) return;
-        
+
             switch (event.code) {
                 case 'KeyW': Game.holdW = true; break;
                 case 'KeyA': Game.holdA = true; break;
@@ -112,7 +116,7 @@ export class Game {
                 }
             }
         });
-        
+
         addEventListener('keyup', event => {
             switch (event.code) {
                 case 'KeyW': Game.holdW = false; break;
@@ -125,17 +129,17 @@ export class Game {
                 case 'ArrowRight': Game.holdD = false; break;
             }
         });
-        
+
         addEventListener('mousedown', event => {
             if (event.button !== 0) return;
-        
+
             Game.holdAttack = true;
             Game.mousePosition.x = event.x;
             Game.mousePosition.y = event.y;
         });
-        
+
         addEventListener('mouseup', event => { if (event.button === 0) Game.holdAttack = false; });
-        
+
         addEventListener('mousemove', event => {
             Game.mousePosition.x = event.x;
             Game.mousePosition.y = event.y;
@@ -144,17 +148,17 @@ export class Game {
         Game.socket.on('player_connected', newPlayer => {
             Game.otherPlayers.push(newPlayer);
         });
-        
+
         Game.socket.on('player_move', (id, position) => {
             const index = Game.otherPlayers.findIndex(player => player.id === id);
             Game.otherPlayers[index].position = position;
         });
-        
+
         Game.socket.on('player_change_colour', (id, colour) => {
             const index = Game.otherPlayers.findIndex(player => player.id === id);
             Game.otherPlayers[index].colour = colour;
         });
-        
+
         Game.socket.on('create_projectile', projectile => {
             // TODO: Is there a better way to reconstruct these objects? Or not have to reconstruct them?
             Game.projectiles.unshift(new Projectile(
@@ -167,11 +171,11 @@ export class Game {
                 projectile.tail
             ));
         });
-        
+
         Game.socket.on('projectile_hit', (projectileID, targetID) => {
             const projectileIndex = Game.projectiles.findIndex(projectile => projectile.id === projectileID);
             Game.projectiles[projectileIndex].destroyed = true;
-        
+
             if (targetID === Game.socket.id) {
                 ++Game.hitsTaken;
             } else {
@@ -179,7 +183,7 @@ export class Game {
                 ++Game.otherPlayers[index].hitsTaken;
             }
         });
-        
+
         Game.socket.on('player_disconnected', id => {
             const index = Game.otherPlayers.findIndex(player => player.id === id);
             Game.otherPlayers.splice(index, 1);
@@ -192,17 +196,20 @@ export class Game {
         requestAnimationFrame(Game.#update);
     }
 
+    /**
+     * @param {DOMHighResTimeStamp} t 
+     */
     static #update(t) {
         Game.deltaTime = (t - Game.#prev) / 1000;
         Game.#prev = t;
 
         Game.playerPrevious = structuredClone(Game.playerPosition);
-    
+
         if (Game.holdW) Game.playerPosition.y -= Game.PLAYER_SPEED * Game.deltaTime;
         if (Game.holdD) Game.playerPosition.x += Game.PLAYER_SPEED * Game.deltaTime;
         if (Game.holdS) Game.playerPosition.y += Game.PLAYER_SPEED * Game.deltaTime;
         if (Game.holdA) Game.playerPosition.x -= Game.PLAYER_SPEED * Game.deltaTime;
-    
+
         if (Game.playerPosition.y - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
             Game.playerPosition.y = -Game.CANVAS_WORLD_SPACE_HEIGHT / 2 + Game.PLAYER_RADIUS;
         if (Game.playerPosition.x + Game.PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_WIDTH / 2)
@@ -211,7 +218,7 @@ export class Game {
             Game.playerPosition.y = Game.CANVAS_WORLD_SPACE_HEIGHT / 2 - Game.PLAYER_RADIUS;
         if (Game.playerPosition.x - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_WIDTH / 2)
             Game.playerPosition.x = -Game.CANVAS_WORLD_SPACE_WIDTH / 2 + Game.PLAYER_RADIUS;
-    
+
         if (Game.holdAttack) {
             if (Game.attackT <= 0) {
                 const clickPosition = Game.screenSpacePointToWorldSpace(
@@ -220,9 +227,9 @@ export class Game {
                         Game.mousePosition.y - Game.canvas.offsetTop
                     )
                 );
-    
+
                 const direction = Vector2.subtract(clickPosition, Game.playerPosition).normalized;
-    
+
                 const projectile = new Projectile(
                     uuidv4(),
                     Game.socket.id,
@@ -233,23 +240,23 @@ export class Game {
                     direction,
                     50
                 );
-    
+
                 // TODO: CreateNetworkObject function?
                 Game.projectiles.unshift(projectile);
                 Game.socket.emit('create_projectile', projectile);
-    
+
                 Game.attackT += Game.ATTACK_INTERVAL;
             }
         }
-    
+
         if (!Vector2.equal(Game.playerPosition, Game.playerPrevious))
             Game.socket.emit('player_move', Game.playerPosition);
-    
+
         Game.context.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
-    
+
         for (let i = Game.projectiles.length - 1; i >= 0; --i) {
             Game.projectiles[i].update(Game.deltaTime);
-    
+
             if (Game.projectiles[i].owner === Game.socket.id) {
                 for (const player of Game.otherPlayers) {
                     if (Physics.lineCircleCollision(
@@ -264,15 +271,15 @@ export class Game {
                     }
                 }
             }
-    
+
             if (Game.projectiles[i].destroyed) {
                 Game.projectiles.splice(i, 1);
                 continue;
             }
-    
+
             const lineStart = Game.worldSpacePointToScreenSpace(Game.projectiles[i].tail);
             const lineEnd = Game.worldSpacePointToScreenSpace(Game.projectiles[i].head);
-    
+
             Game.context.beginPath();
             Game.context.strokeStyle = 'rgb(255, 255, 255)';
             Game.context.lineWidth = 2;
@@ -280,32 +287,32 @@ export class Game {
             Game.context.lineTo(lineEnd.x, lineEnd.y);
             Game.context.stroke();
         }
-    
+
         for (const player of Game.otherPlayers) {
             const playerPos = Game.worldSpacePointToScreenSpace(player.position);
-    
+
             Game.context.beginPath();
             Game.context.arc(playerPos.x, playerPos.y, Game.playerRadiusScreenSpace, 0, 2 * Math.PI, false);
             Game.context.fillStyle = Game.PLAYER_COLOURS[player.colour];
             Game.context.fill();
         }
-    
+
         const playerPos = Game.worldSpacePointToScreenSpace(Game.playerPosition);
-    
+
         Game.context.beginPath();
         Game.context.arc(playerPos.x, playerPos.y, Game.playerRadiusScreenSpace, 0, 2 * Math.PI, false);
         Game.context.fillStyle = Game.PLAYER_COLOURS[Game.playerColour];
         Game.context.fill();
-    
+
         for (const player of Game.otherPlayers) {
             const playerPos = Game.worldSpacePointToScreenSpace(player.position);
             Game.context.fillStyle = Game.PLAYER_COLOURS[player.colour];
             Game.context.fillText(player.hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
         }
-    
+
         Game.context.fillStyle = Game.PLAYER_COLOURS[Game.playerColour];
         Game.context.fillText(Game.hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
-    
+
         Game.attackT -= Game.deltaTime;
         if (Game.attackT < 0) Game.attackT = 0;
 
