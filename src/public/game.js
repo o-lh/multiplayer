@@ -1,8 +1,10 @@
 import { v4 as uuidv4 } from './uuid/index.js';
 
+// TODO: import Engine?
 import { Entity } from './entity.js';
 import { Physics } from './physics.js';
 import { Projectile } from "./projectile.js";
+import { Time } from './time.js';
 import { Vector2 } from "./vector2.js";
 
 export class Game {
@@ -69,10 +71,6 @@ export class Game {
 
     /** @type {Entity[]} */
     static entities = [];
-
-    // TODO: Manage the deltaTime for the first frame properly (currently includes loading time)
-    static deltaTime;
-    static #prev = 0;
 
     static run() {
         Game.canvas.width = Game.smallerDimension;
@@ -197,18 +195,17 @@ export class Game {
     }
 
     /**
-     * @param {DOMHighResTimeStamp} t
+     * @param {DOMHighResTimeStamp} time
      */
-    static #update(t) {
-        Game.deltaTime = (t - Game.#prev) / 1000;
-        Game.#prev = t;
+    static #update(time) {
+        Time.tick(time);
 
         Game.playerPrevious = structuredClone(Game.playerPosition);
 
-        if (Game.holdW) Game.playerPosition.y -= Game.PLAYER_SPEED * Game.deltaTime;
-        if (Game.holdD) Game.playerPosition.x += Game.PLAYER_SPEED * Game.deltaTime;
-        if (Game.holdS) Game.playerPosition.y += Game.PLAYER_SPEED * Game.deltaTime;
-        if (Game.holdA) Game.playerPosition.x -= Game.PLAYER_SPEED * Game.deltaTime;
+        if (Game.holdW) Game.playerPosition.y -= Game.PLAYER_SPEED * Time.deltaTime;
+        if (Game.holdD) Game.playerPosition.x += Game.PLAYER_SPEED * Time.deltaTime;
+        if (Game.holdS) Game.playerPosition.y += Game.PLAYER_SPEED * Time.deltaTime;
+        if (Game.holdA) Game.playerPosition.x -= Game.PLAYER_SPEED * Time.deltaTime;
 
         if (Game.playerPosition.y - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
             Game.playerPosition.y = -Game.CANVAS_WORLD_SPACE_HEIGHT / 2 + Game.PLAYER_RADIUS;
@@ -255,7 +252,7 @@ export class Game {
         Game.context.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
 
         for (let i = Game.projectiles.length - 1; i >= 0; --i) {
-            Game.projectiles[i].update(Game.deltaTime);
+            Game.projectiles[i].update(Time.deltaTime);
 
             if (Game.projectiles[i].owner === Game.socket.id) {
                 for (const player of Game.otherPlayers) {
@@ -313,7 +310,7 @@ export class Game {
         Game.context.fillStyle = Game.PLAYER_COLOURS[Game.playerColour];
         Game.context.fillText(Game.hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
 
-        Game.attackT -= Game.deltaTime;
+        Game.attackT -= Time.deltaTime;
         if (Game.attackT < 0) Game.attackT = 0;
 
         // TODO: Untie game logic from frame rate

@@ -1,4 +1,5 @@
 import { Component } from "./component.js";
+import { Time } from './time.js';
 import { Vector2 } from "./vector2.js";
 
 export class Projectile extends Component {
@@ -22,13 +23,10 @@ export class Projectile extends Component {
         this.tail = origin;
     }
 
-    /**
-     * @param {number} deltaTime
-     */
-    update(deltaTime) {
+    update() {
         this.head = Vector2.add(
             this.head,
-            Vector2.multiplyScalar(this.direction, this.speed * deltaTime)
+            Vector2.multiplyScalar(this.direction, this.speed * Time.deltaTime)
         );
 
         // TODO: These boundaries are hard-coded
