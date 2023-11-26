@@ -252,7 +252,7 @@ export class Game {
         Game.context.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
 
         for (let i = Game.projectiles.length - 1; i >= 0; --i) {
-            Game.projectiles[i].update(Time.deltaTime);
+            Game.projectiles[i].update();
 
             if (Game.projectiles[i].owner === Game.socket.id) {
                 for (const player of Game.otherPlayers) {
