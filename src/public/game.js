@@ -188,7 +188,7 @@ export class Game {
             const index = Game.otherPlayers.findIndex(player => player.id === id);
             Game.otherPlayers.splice(index, 1);
         });
-        
+
         // Set the player's initial position on the server
         Game.socket.emit('player_move', Game.playerPosition);
 
@@ -197,7 +197,7 @@ export class Game {
     }
 
     /**
-     * @param {DOMHighResTimeStamp} t 
+     * @param {DOMHighResTimeStamp} t
      */
     static #update(t) {
         Game.deltaTime = (t - Game.#prev) / 1000;

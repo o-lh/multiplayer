@@ -1,6 +1,7 @@
+import { Component } from "./component.js";
 import { Vector2 } from "./vector2.js";
 
-export class Projectile {
+export class Projectile extends Component {
     /**
      * @param {string} id
      * @param {string} owner
@@ -9,6 +10,8 @@ export class Projectile {
      * @param {number} speed
      */
     constructor(id, owner, origin, direction, speed) {
+        super();
+
         this.id = id;
         this.destroyed = false;
         this.owner = owner;
