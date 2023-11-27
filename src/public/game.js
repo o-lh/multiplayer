@@ -72,6 +72,13 @@ export class Game {
     /** @type {Entity[]} */
     static entities = [];
 
+    /**
+     * @param {Entity} entity
+     */
+    static addEntity() {
+        return this.entities[this.entities.push(new Entity()) - 1];
+    }
+
     static run() {
         Game.canvas.width = Game.smallerDimension;
         Game.canvas.height = Game.smallerDimension;
@@ -200,9 +207,15 @@ export class Game {
     static #update(time) {
         Time.tick(time);
 
-        for (const [i, entity] of Game.entities.entries()) {
+        for (const entity of Game.entities) {
             for (const component of entity.components) {
                 component.update();
+            }
+        }
+
+        for (let i = Game.entities.length - 1; i >= 0; --i) {
+            if (Game.entities[i].destroyed) {
+                Game.entities.splice(i, 1);
             }
         }
 
@@ -233,7 +246,7 @@ export class Game {
 
                 const direction = Vector2.subtract(clickPosition, Game.playerPosition).normalized;
 
-                const entity = new Entity();
+                const entity = Game.addEntity();
                 // const projectile = entity.addComponent(Projectile);
 
                 entity.components.push(new Projectile(
@@ -246,8 +259,6 @@ export class Game {
                     direction,
                     50
                 ));
-
-                Game.entities.push(entity);
 
                 // TODO: CreateNetworkObject function?
                 Game.projectiles.unshift(entity.getComponent(Projectile));
