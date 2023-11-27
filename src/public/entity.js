@@ -20,6 +20,10 @@ export class Entity {
         return this.components[this.components.push(new component(this)) - 1];
     }
 
+    destroy() {
+        this.destroyed = true;
+    }
+
     /**
      * @param {class} component
      * @returns {Component | undefined}
