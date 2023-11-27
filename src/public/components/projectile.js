@@ -1,20 +1,17 @@
 import { Component } from "../component.js";
+import { Game } from "../game.js";
+import { Physics } from "../physics.js";
 import { Time } from '../time.js';
 import { Vector2 } from "../vector2.js";
 
 export class Projectile extends Component {
     /**
-     * @param {string} id
      * @param {string} owner
      * @param {Vector2} origin
      * @param {Vector2} direction
      * @param {number} speed
      */
-    constructor(id, owner, origin, direction, speed) {
-        super();
-
-        this.id = id;
-        this.destroyed = false;
+    init(owner, origin, direction, speed) {
         this.owner = owner;
         this.origin = origin;
         this.direction = direction;
@@ -31,7 +28,7 @@ export class Projectile extends Component {
 
         // TODO: These boundaries are hard-coded
         if (this.tail.y < -10 || this.tail.x > 10 || this.tail.y > 10 || this.tail.x < -10) {
-            // this.entity.destroyed = true;
+            this.entity.destroyed = true;
             return;
         }
 
@@ -41,6 +38,21 @@ export class Projectile extends Component {
         );
 
         if (this.#isTailPastOrigin()) this.tail = this.origin;
+
+        if (this.owner === Game.socket.id) {
+            for (const player of Game.otherPlayers) {
+                if (Physics.lineCircleCollision(
+                    this.tail,
+                    this.head,
+                    player.position,
+                    Game.PLAYER_RADIUS
+                )) {
+                    Game.socket.emit('projectile_hit', this.id, player.id);
+                    this.destroyed = true;
+                    ++player.hitsTaken;
+                }
+            }
+        }
     }
 
     #isTailPastOrigin() {

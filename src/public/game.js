@@ -2,7 +2,6 @@ import { v4 as uuidv4 } from './uuid/index.js';
 
 // TODO: import Engine?
 import { Entity } from './entity.js';
-import { Physics } from './physics.js';
 import { Projectile } from "./components/projectile.js";
 import { Time } from './time.js';
 import { Vector2 } from "./vector2.js";
@@ -247,10 +246,8 @@ export class Game {
                 const direction = Vector2.subtract(clickPosition, Game.playerPosition).normalized;
 
                 const entity = Game.addEntity();
-                // const projectile = entity.addComponent(Projectile);
 
-                entity.components.push(new Projectile(
-                    uuidv4(),
+                entity.addComponent(Projectile).init(
                     Game.socket.id,
                     Vector2.add(
                         structuredClone(Game.playerPosition),
@@ -258,11 +255,11 @@ export class Game {
                     ),
                     direction,
                     50
-                ));
+                );
 
                 // TODO: CreateNetworkObject function?
                 Game.projectiles.unshift(entity.getComponent(Projectile));
-                Game.socket.emit('create_projectile', entity.getComponent(Projectile));
+                // Game.socket.emit('create_projectile', entity.getComponent(Projectile));
 
                 Game.attackT += Game.ATTACK_INTERVAL;
             }
@@ -273,29 +270,9 @@ export class Game {
 
         Game.context.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
 
-        for (let i = Game.projectiles.length - 1; i >= 0; --i) {
-            if (Game.projectiles[i].owner === Game.socket.id) {
-                for (const player of Game.otherPlayers) {
-                    if (Physics.lineCircleCollision(
-                        Game.projectiles[i].tail,
-                        Game.projectiles[i].head,
-                        player.position,
-                        Game.PLAYER_RADIUS
-                    )) {
-                        Game.socket.emit('projectile_hit', Game.projectiles[i].id, player.id);
-                        Game.projectiles[i].destroyed = true;
-                        ++player.hitsTaken;
-                    }
-                }
-            }
-
-            if (Game.projectiles[i].destroyed) {
-                Game.projectiles.splice(i, 1);
-                continue;
-            }
-
-            const lineStart = Game.worldSpacePointToScreenSpace(Game.projectiles[i].tail);
-            const lineEnd = Game.worldSpacePointToScreenSpace(Game.projectiles[i].head);
+        for (const projectile of Game.projectiles) {
+            const lineStart = Game.worldSpacePointToScreenSpace(projectile.tail);
+            const lineEnd = Game.worldSpacePointToScreenSpace(projectile.head);
 
             Game.context.beginPath();
             Game.context.strokeStyle = 'rgb(255, 255, 255)';
