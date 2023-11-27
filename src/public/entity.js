@@ -6,9 +6,18 @@ export class Entity {
     constructor() {
         /** @type {string} */
         this.id = uuidv4();
+        this.destroyed = false;
         this.position = new Vector2();
         /** @type {Component[]} */
         this.components = [];
+    }
+
+    /**
+     * @param {class} component
+     * @returns {Component}
+     */
+    addComponent(component) {
+        return this.components[this.components.push(new component(this)) - 1];
     }
 
     /**

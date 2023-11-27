@@ -1,6 +1,6 @@
-import { Component } from "./component.js";
-import { Time } from './time.js';
-import { Vector2 } from "./vector2.js";
+import { Component } from "../component.js";
+import { Time } from '../time.js';
+import { Vector2 } from "../vector2.js";
 
 export class Projectile extends Component {
     /**
@@ -31,7 +31,7 @@ export class Projectile extends Component {
 
         // TODO: These boundaries are hard-coded
         if (this.tail.y < -10 || this.tail.x > 10 || this.tail.y > 10 || this.tail.x < -10) {
-            this.destroyed = true;
+            // this.entity.destroyed = true;
             return;
         }
 

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from './uuid/index.js';
 // TODO: import Engine?
 import { Entity } from './entity.js';
 import { Physics } from './physics.js';
-import { Projectile } from "./projectile.js";
+import { Projectile } from "./components/projectile.js";
 import { Time } from './time.js';
 import { Vector2 } from "./vector2.js";
 
@@ -200,6 +200,12 @@ export class Game {
     static #update(time) {
         Time.tick(time);
 
+        for (const [i, entity] of Game.entities.entries()) {
+            for (const component of entity.components) {
+                component.update();
+            }
+        }
+
         Game.playerPrevious = structuredClone(Game.playerPosition);
 
         if (Game.holdW) Game.playerPosition.y -= Game.PLAYER_SPEED * Time.deltaTime;
@@ -227,7 +233,10 @@ export class Game {
 
                 const direction = Vector2.subtract(clickPosition, Game.playerPosition).normalized;
 
-                const projectile = new Projectile(
+                const entity = new Entity();
+                // const projectile = entity.addComponent(Projectile);
+
+                entity.components.push(new Projectile(
                     uuidv4(),
                     Game.socket.id,
                     Vector2.add(
@@ -236,11 +245,13 @@ export class Game {
                     ),
                     direction,
                     50
-                );
+                ));
+
+                Game.entities.push(entity);
 
                 // TODO: CreateNetworkObject function?
-                Game.projectiles.unshift(projectile);
-                Game.socket.emit('create_projectile', projectile);
+                Game.projectiles.unshift(entity.getComponent(Projectile));
+                Game.socket.emit('create_projectile', entity.getComponent(Projectile));
 
                 Game.attackT += Game.ATTACK_INTERVAL;
             }
@@ -252,8 +263,6 @@ export class Game {
         Game.context.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
 
         for (let i = Game.projectiles.length - 1; i >= 0; --i) {
-            Game.projectiles[i].update();
-
             if (Game.projectiles[i].owner === Game.socket.id) {
                 for (const player of Game.otherPlayers) {
                     if (Physics.lineCircleCollision(
