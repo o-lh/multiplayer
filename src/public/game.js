@@ -163,6 +163,7 @@ export class Game {
             Game.otherPlayers[index].colour = colour;
         });
 
+        // TODO: Replace with create_entity
         Game.socket.on('create_projectile', projectile => {
             // TODO: Is there a better way to reconstruct these objects? Or not have to reconstruct them?
             Game.projectiles.unshift(new Projectile(
@@ -259,7 +260,18 @@ export class Game {
 
                 // TODO: CreateNetworkObject function?
                 Game.projectiles.unshift(entity.getComponent(Projectile));
-                // Game.socket.emit('create_projectile', entity.getComponent(Projectile));
+
+                Game.socket.emit('create_entity',
+                    JSON.stringify(structuredClone(entity), (key, value) => {
+                        if (key === 'components') {
+                            for (const component of value) {
+                                delete component.entity;
+                            }
+                        }
+
+                        return value;
+                    })
+                );
 
                 Game.attackT += Game.ATTACK_INTERVAL;
             }

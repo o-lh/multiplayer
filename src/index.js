@@ -54,6 +54,10 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('player_change_colour', socket.id, colour);
     });
 
+    socket.on('create_entity', entity => {
+        console.log(entity);
+    });
+
     socket.on('create_projectile', projectile => {
         socket.broadcast.emit('create_projectile', projectile);
     });
