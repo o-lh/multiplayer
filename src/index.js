@@ -55,7 +55,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('create_entity', entity => {
-        console.log(entity);
+        socket.broadcast.emit('create_entity', entity);
     });
 
     socket.on('create_projectile', projectile => {

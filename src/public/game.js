@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from './uuid/index.js';
-
 // TODO: import Engine?
 import { Entity } from './entity.js';
 import { Projectile } from "./components/projectile.js";
@@ -177,6 +175,11 @@ export class Game {
             ));
         });
 
+        Game.socket.on('create_entity', serializedEntity => {
+            serializedEntity = JSON.parse(serializedEntity);
+            console.log(serializedEntity);
+        });
+
         Game.socket.on('projectile_hit', (projectileID, targetID) => {
             const projectileIndex = Game.projectiles.findIndex(projectile => projectile.id === projectileID);
             Game.projectiles[projectileIndex].destroyed = true;
@@ -263,9 +266,12 @@ export class Game {
 
                 Game.socket.emit('create_entity',
                     JSON.stringify(structuredClone(entity), (key, value) => {
-                        if (key === 'components') {
-                            for (const component of value) {
-                                delete component.entity;
+                        if (key === '') {
+                            delete value.destroyed;
+
+                            for (let i = 0; i < value.components.length; ++i) {
+                                value.components[i].name = entity.components[i].constructor.name;
+                                delete value.components[i].entity;
                             }
                         }
 
