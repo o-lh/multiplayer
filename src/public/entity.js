@@ -17,7 +17,10 @@ export class Entity {
      * @returns {Component}
      */
     addComponent(component) {
-        return this.components[this.components.push(new component(this)) - 1];
+        const addedComponent = this.components[this.components.push(new component(this)) - 1];
+        addedComponent.constructorName = addedComponent.constructor.name;
+
+        return addedComponent;
     }
 
     destroy() {

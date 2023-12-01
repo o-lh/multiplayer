@@ -190,11 +190,9 @@ export class Game {
 
             for (const serializedComponent of serializedEntity.components) {
                 const component = entity.addComponent(lookup[serializedComponent.constructorName]);
-                delete serializedComponent.constructorName;
 
+                // TODO: If this is an object, construct is using constructorName, and create properties recursively
                 for (const property in serializedComponent) {
-                    if (property === 'name') continue;
-                    
                     component[property] = serializedComponent[property];
                 }
             }
@@ -287,24 +285,13 @@ export class Game {
                 // TODO: CreateNetworkObject function?
                 Game.projectiles.unshift(entity.getComponent(Projectile));
 
-                // TODO: This mess is only necessary to preserve classes after being deserialized
-                // Perhaps using a different approach would be best, where a component is only data with no methods
                 Game.socket.emit('create_entity',
                     JSON.stringify(structuredClone(entity), (key, value) => {
                         if (key === '') {
                             delete value.destroyed;
 
                             for (let i = 0; i < value.components.length; ++i) {
-                                value.components[i].constructorName =
-                                    entity.components[i].constructor.name;
                                 delete value.components[i].entity;
-                                
-                                for (const property in value.components[i]) {
-                                    if (typeof value.components[i][property] === 'object') {
-                                        value.components[i][property].constructorName =
-                                            entity.components[i][property].constructor.name
-                                    }
-                                }
                             }
                         }
 
