@@ -186,6 +186,7 @@ export class Game {
                 serializedEntity.position.y
             );
 
+            // TODO: Move these... somewhere
             const lookup = { Vector2: Vector2, Projectile: Projectile };
 
             for (const serializedComponent of serializedEntity.components) {
@@ -287,12 +288,10 @@ export class Game {
 
                 Game.socket.emit('create_entity',
                     JSON.stringify(structuredClone(entity), (key, value) => {
-                        if (key === '') {
-                            delete value.destroyed;
+                        if (key === '') delete value.destroyed;
 
-                            for (let i = 0; i < value.components.length; ++i) {
-                                delete value.components[i].entity;
-                            }
+                        if (key === 'components') for (const component of value) {
+                            delete component.entity;
                         }
 
                         return value;
