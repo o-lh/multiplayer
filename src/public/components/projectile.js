@@ -58,7 +58,6 @@ export class Projectile extends Component {
     #isTailPastOrigin() {
         const sqrToTail = Vector2.subtract(this.head, this.tail).sqrMagnitude;
         const sqrToOrigin = Vector2.subtract(this.head, this.origin).sqrMagnitude;
-
         return sqrToTail > sqrToOrigin;
     }
 }

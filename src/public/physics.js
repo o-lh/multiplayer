@@ -25,7 +25,6 @@ export class Physics {
         const toCircle = Vector2.subtract(circleCenter, lineStart);
         const t = Math.max(0, Math.min(Vector2.dot(line, toCircle) / line.sqrMagnitude, 1));
         const closestPoint = Vector2.add(lineStart, Vector2.multiplyScalar(line, t));
-
         return this.pointCircleCollision(closestPoint, circleCenter, circleRadius);
     }
 }
