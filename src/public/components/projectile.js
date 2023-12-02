@@ -55,6 +55,18 @@ export class Projectile extends Component {
         }
     }
 
+    render() {
+        const lineStart = Game.worldSpacePointToScreenSpace(this.tail);
+        const lineEnd = Game.worldSpacePointToScreenSpace(this.head);
+
+        Game.context.beginPath();
+        Game.context.strokeStyle = 'rgb(255, 255, 255)';
+        Game.context.lineWidth = 2;
+        Game.context.moveTo(lineStart.x, lineStart.y);
+        Game.context.lineTo(lineEnd.x, lineEnd.y);
+        Game.context.stroke();
+    }
+
     #isTailPastOrigin() {
         const sqrToTail = Vector2.subtract(this.head, this.tail).sqrMagnitude;
         const sqrToOrigin = Vector2.subtract(this.head, this.origin).sqrMagnitude;

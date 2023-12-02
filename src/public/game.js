@@ -306,16 +306,10 @@ export class Game {
 
         Game.context.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
 
-        for (const projectile of Game.projectiles) {
-            const lineStart = Game.worldSpacePointToScreenSpace(projectile.tail);
-            const lineEnd = Game.worldSpacePointToScreenSpace(projectile.head);
-
-            Game.context.beginPath();
-            Game.context.strokeStyle = 'rgb(255, 255, 255)';
-            Game.context.lineWidth = 2;
-            Game.context.moveTo(lineStart.x, lineStart.y);
-            Game.context.lineTo(lineEnd.x, lineEnd.y);
-            Game.context.stroke();
+        for (const entity of Game.entities) {
+            for (const component of entity.components) {
+                component.render();
+            }
         }
 
         for (const player of Game.otherPlayers) {
