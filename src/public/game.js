@@ -176,27 +176,40 @@ export class Game {
         });
 
         Game.socket.on('create_entity', serializedEntity => {
-            // TODO: Use second parameter of parse to deserialize?
             serializedEntity = JSON.parse(serializedEntity);
 
             const entity = Game.addEntity();
-            entity.id = serializedEntity.id;
-            entity.position = new Vector2(
-                serializedEntity.position.x,
-                serializedEntity.position.y
-            );
 
             // TODO: Move these... somewhere
+            // TODO: But deserializeProperties requires entity in scope to add it to components
             const lookup = { Vector2: Vector2, Projectile: Projectile };
 
-            for (const serializedComponent of serializedEntity.components) {
-                const component = entity.addComponent(lookup[serializedComponent.constructorName]);
+            function deserializeProperties(serializedObject, deserializedObject) {
+                for (const property in serializedObject) {
+                    if (typeof serializedObject[property] === 'object') {
+                        if (Array.isArray(serializedObject[property])) {
+                            deserializedObject[property] = [];
+                        } else {
+                            deserializedObject[property] =
+                                new lookup[serializedObject[property].constructorName]();
+    
+                            // TODO: This will need to be changed if any other non-component classes are added
+                            if (deserializedObject[property].constructorName !== 'Vector2') {
+                                deserializedObject[property].entity = entity;
+                            }
+                        }
 
-                // TODO: If this is an object, construct is using constructorName, and create properties recursively
-                for (const property in serializedComponent) {
-                    component[property] = serializedComponent[property];
+                        deserializeProperties(
+                            serializedObject[property],
+                            deserializedObject[property]
+                        );
+                    } else {
+                        deserializedObject[property] = serializedObject[property];
+                    }
                 }
             }
+
+            deserializeProperties(serializedEntity, entity);
 
             // TODO: Remove later
             Game.projectiles.unshift(entity.getComponent(Projectile));
