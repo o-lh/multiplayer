@@ -1,4 +1,4 @@
-export class Player {
+export class PlayerObject {
     /**
      * @param {string} id
      * @param {Vector2} position

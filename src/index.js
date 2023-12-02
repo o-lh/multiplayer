@@ -7,7 +7,7 @@ import express from 'express';
 import favicon from 'serve-favicon';
 
 // TODO: /shared or /common folder?
-import { Player } from './public/player.js'
+import { PlayerObject } from './public/player-object.js'
 import { Vector2 } from './public/vector2.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -26,11 +26,11 @@ app.use('/uuid', express.static(join(__dirname, '..', 'node_modules', 'uuid', 'd
 // - https://socket.io/docs/v4/client-options/#auth
 // - https://socket.io/how-to/deal-with-cookies
 
-/** @type {Player[]} */
+/** @type {PlayerObject[]} */
 const players = [];
 
 io.on('connection', (socket) => {
-    const player = new Player(socket.id, new Vector2(), 0);
+    const player = new PlayerObject(socket.id, new Vector2(), 0);
 
     // Broadcast new player to all other players
     socket.broadcast.emit('player_connected', player);

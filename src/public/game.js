@@ -35,7 +35,7 @@ export class Game {
     ];
     static playerColour = 0;
     static hitsTaken = 0;
-    /** @type {Player[]} */
+    /** @type {PlayerObject[]} */
     static otherPlayers = [];
     /** @type {Projectile[]} */
     static projectiles = [];
