@@ -161,20 +161,6 @@ export class Game {
             Game.otherPlayers[index].colour = colour;
         });
 
-        // TODO: Replace with create_entity
-        Game.socket.on('create_projectile', projectile => {
-            // TODO: Is there a better way to reconstruct these objects? Or not have to reconstruct them?
-            Game.projectiles.unshift(new Projectile(
-                projectile.id,
-                projectile.owner,
-                projectile.origin,
-                projectile.direction,
-                projectile.speed,
-                projectile.head,
-                projectile.tail
-            ));
-        });
-
         Game.socket.on('create_entity', serializedEntity => {
             serializedEntity = JSON.parse(serializedEntity);
 
