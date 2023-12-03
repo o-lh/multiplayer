@@ -52,10 +52,6 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('create_entity', entity);
     });
 
-    socket.on('create_projectile', projectile => {
-        socket.broadcast.emit('create_projectile', projectile);
-    });
-
     socket.on('projectile_hit', (projectileID, targetID) => {
         const index = players.findIndex(player => player.id === targetID);
         if (index !== -1) ++players[index].hitsTaken;
