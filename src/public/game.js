@@ -1,5 +1,6 @@
 // TODO: import Engine?
 import { Entity } from './entity.js';
+import { Player } from './components/player.js';
 import { Projectile } from "./components/projectile.js";
 import { Time } from './time.js';
 import { Vector2 } from "./vector2.js";
@@ -199,6 +200,9 @@ export class Game {
 
         // Set the player's initial position on the server
         Game.socket.emit('player_move', Game.playerPosition);
+        
+        const player = this.addEntity();
+        player.addComponent(Player).init();
 
         // TODO: socket.id is undefined initially. Perhaps only start once it is defined?
         requestAnimationFrame(Game.#update);
