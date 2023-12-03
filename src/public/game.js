@@ -4,6 +4,7 @@ import { Player } from './components/player.js';
 import { Projectile } from "./components/projectile.js";
 import { Time } from './time.js';
 import { Vector2 } from "./vector2.js";
+import { Input } from './input.js';
 
 export class Game {
     // TODO: Begin the mess zone
@@ -18,10 +19,6 @@ export class Game {
     /** @type {number} */
     static playerRadiusScreenSpace;
     static mousePosition = new Vector2();
-    static holdW = false;
-    static holdA = false;
-    static holdS = false;
-    static holdD = false;
     static holdAttack = false;
     static ATTACK_INTERVAL = 0.2;
     static attackT = 0;
@@ -57,6 +54,9 @@ export class Game {
     }
     // TODO: End the mess zone
 
+    /** @type {function} */
+    static #updateInput;
+
     /** @type {Entity[]} */
     static entities = [];
 
@@ -89,33 +89,7 @@ export class Game {
             Game.playerRadiusScreenSpace = Game.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS);
         });
 
-        addEventListener('keydown', event => {
-            if (event.repeat) return;
-
-            switch (event.code) {
-                case 'KeyW': Game.holdW = true; break;
-                case 'KeyA': Game.holdA = true; break;
-                case 'KeyS': Game.holdS = true; break;
-                case 'KeyD': Game.holdD = true; break;
-                case 'ArrowUp': Game.holdW = true; break;
-                case 'ArrowLeft': Game.holdA = true; break;
-                case 'ArrowDown': Game.holdS = true; break;
-                case 'ArrowRight': Game.holdD = true; break;
-            }
-        });
-
-        addEventListener('keyup', event => {
-            switch (event.code) {
-                case 'KeyW': Game.holdW = false; break;
-                case 'KeyA': Game.holdA = false; break;
-                case 'KeyS': Game.holdS = false; break;
-                case 'KeyD': Game.holdD = false; break;
-                case 'ArrowUp': Game.holdW = false; break;
-                case 'ArrowLeft': Game.holdA = false; break;
-                case 'ArrowDown': Game.holdS = false; break;
-                case 'ArrowRight': Game.holdD = false; break;
-            }
-        });
+        this.#updateInput = Input.init();
 
         addEventListener('mousedown', event => {
             if (event.button !== 0) return;
@@ -158,7 +132,7 @@ export class Game {
                         } else {
                             deserializedObject[property] =
                                 new lookup[serializedObject[property].constructorName]();
-    
+
                             // TODO: This will need to be changed if any other non-component classes are added
                             if (deserializedObject[property].constructorName !== 'Vector2') {
                                 deserializedObject[property].entity = entity;
@@ -200,7 +174,7 @@ export class Game {
 
         // Set the player's initial position on the server
         Game.socket.emit('player_move', Game.playerPosition);
-        
+
         const player = this.addEntity();
         player.addComponent(Player).init();
 
@@ -213,6 +187,7 @@ export class Game {
      */
     static #update(time) {
         Time.tick(time);
+        Game.#updateInput();
 
         for (const entity of Game.entities) {
             for (const component of entity.components) {
@@ -228,10 +203,14 @@ export class Game {
 
         Game.playerPrevious = structuredClone(Game.playerPosition);
 
-        if (Game.holdW) Game.playerPosition.y -= Game.PLAYER_SPEED * Time.deltaTime;
-        if (Game.holdD) Game.playerPosition.x += Game.PLAYER_SPEED * Time.deltaTime;
-        if (Game.holdS) Game.playerPosition.y += Game.PLAYER_SPEED * Time.deltaTime;
-        if (Game.holdA) Game.playerPosition.x -= Game.PLAYER_SPEED * Time.deltaTime;
+        if (Input.keyHeld('KeyW') || Input.keyHeld('ArrowUp'))
+            Game.playerPosition.y -= Game.PLAYER_SPEED * Time.deltaTime;
+        if (Input.keyHeld('KeyD') || Input.keyHeld('ArrowRight'))
+            Game.playerPosition.x += Game.PLAYER_SPEED * Time.deltaTime;
+        if (Input.keyHeld('KeyS') || Input.keyHeld('ArrowDown'))
+            Game.playerPosition.y += Game.PLAYER_SPEED * Time.deltaTime;
+        if (Input.keyHeld('KeyA') || Input.keyHeld('ArrowLeft'))
+            Game.playerPosition.x -= Game.PLAYER_SPEED * Time.deltaTime;
 
         if (Game.playerPosition.y - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
             Game.playerPosition.y = -Game.CANVAS_WORLD_SPACE_HEIGHT / 2 + Game.PLAYER_RADIUS;
