@@ -10,4 +10,6 @@ export class Component {
     }
 
     update() {}
+
+    render() {}
 }
