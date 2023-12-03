@@ -48,12 +48,6 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('player_move', socket.id, position);
     });
 
-    socket.on('player_change_colour', colour => {
-        const index = players.findIndex(player => player.id === socket.id);
-        players[index].colour = colour;
-        socket.broadcast.emit('player_change_colour', socket.id, colour);
-    });
-
     socket.on('create_entity', entity => {
         socket.broadcast.emit('create_entity', entity);
     });

@@ -24,16 +24,6 @@ export class Game {
     static holdAttack = false;
     static ATTACK_INTERVAL = 0.2;
     static attackT = 0;
-    static PLAYER_COLOURS = [
-        'rgb(255, 0, 0)',
-        'rgb(255, 128, 0)',
-        'rgb(255, 255, 0)',
-        'rgb(0, 255, 0)',
-        'rgb(0, 128, 255)',
-        'rgb(64, 0, 255)',
-        'rgb(192, 0, 255)'
-    ];
-    static playerColour = 0;
     static hitsTaken = 0;
     /** @type {PlayerObject[]} */
     static otherPlayers = [];
@@ -110,12 +100,6 @@ export class Game {
                 case 'ArrowLeft': Game.holdA = true; break;
                 case 'ArrowDown': Game.holdS = true; break;
                 case 'ArrowRight': Game.holdD = true; break;
-                case 'Space': {
-                    ++Game.playerColour;
-                    if (Game.playerColour >= Game.PLAYER_COLOURS.length) Game.playerColour = 0;
-                    Game.socket.emit('player_change_colour', Game.playerColour);
-                    break;
-                }
             }
         });
 
@@ -154,11 +138,6 @@ export class Game {
         Game.socket.on('player_move', (id, position) => {
             const index = Game.otherPlayers.findIndex(player => player.id === id);
             Game.otherPlayers[index].position = position;
-        });
-
-        Game.socket.on('player_change_colour', (id, colour) => {
-            const index = Game.otherPlayers.findIndex(player => player.id === id);
-            Game.otherPlayers[index].colour = colour;
         });
 
         Game.socket.on('create_entity', serializedEntity => {
@@ -317,7 +296,7 @@ export class Game {
 
             Game.context.beginPath();
             Game.context.arc(playerPos.x, playerPos.y, Game.playerRadiusScreenSpace, 0, 2 * Math.PI, false);
-            Game.context.fillStyle = Game.PLAYER_COLOURS[player.colour];
+            Game.context.fillStyle = 'rgb(255, 0, 0)';
             Game.context.fill();
         }
 
@@ -325,16 +304,16 @@ export class Game {
 
         Game.context.beginPath();
         Game.context.arc(playerPos.x, playerPos.y, Game.playerRadiusScreenSpace, 0, 2 * Math.PI, false);
-        Game.context.fillStyle = Game.PLAYER_COLOURS[Game.playerColour];
+        Game.context.fillStyle = 'rgb(0, 255, 0)';
         Game.context.fill();
 
         for (const player of Game.otherPlayers) {
             const playerPos = Game.worldSpacePointToScreenSpace(player.position);
-            Game.context.fillStyle = Game.PLAYER_COLOURS[player.colour];
+            Game.context.fillStyle = 'rgb(255, 0, 0)';
             Game.context.fillText(player.hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
         }
 
-        Game.context.fillStyle = Game.PLAYER_COLOURS[Game.playerColour];
+        Game.context.fillStyle = 'rgb(0, 255, 0)';
         Game.context.fillText(Game.hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
 
         Game.attackT -= Time.deltaTime;
