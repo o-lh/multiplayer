@@ -1,5 +1,6 @@
 import { Component } from "../component.js";
 import { Game } from "../game.js";
+import { Network } from "../network.js";
 import { Physics } from "../physics.js";
 import { Time } from '../time.js';
 import { Vector2 } from "../vector2.js";
@@ -39,7 +40,7 @@ export class Projectile extends Component {
 
         if (this.#isTailPastOrigin()) this.tail = this.origin;
 
-        if (this.owner === Game.socket.id) {
+        if (this.owner === Network.socket.id) {
             for (const player of Game.otherPlayers) {
                 if (Physics.lineCircleCollision(
                     this.tail,
@@ -47,7 +48,7 @@ export class Projectile extends Component {
                     player.position,
                     Game.PLAYER_RADIUS
                 )) {
-                    Game.socket.emit('projectile_hit', this.entity.id, player.id);
+                    Network.socket.emit('projectile_hit', this.entity.id, player.id);
                     this.entity.destroyed = true;
                     ++player.hitsTaken;
                 }

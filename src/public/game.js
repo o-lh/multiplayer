@@ -1,14 +1,14 @@
 // TODO: import Engine?
 import { Entity } from './entity.js';
+import { Input } from './input.js';
+import { Network } from './network.js';
 import { Player } from './components/player.js';
 import { Projectile } from "./components/projectile.js";
 import { Time } from './time.js';
 import { Vector2 } from "./vector2.js";
-import { Input } from './input.js';
 
 export class Game {
     // TODO: Begin the mess zone
-    static socket = io();
     static CANVAS_WORLD_SPACE_WIDTH = 20;
     static CANVAS_WORLD_SPACE_HEIGHT = 20;
     /** @type {HTMLCanvasElement} */
@@ -80,16 +80,16 @@ export class Game {
 
         this.#updateInput = Input.init();
 
-        Game.socket.on('player_connected', newPlayer => {
+        Network.socket.on('player_connected', newPlayer => {
             Game.otherPlayers.push(newPlayer);
         });
 
-        Game.socket.on('player_move', (id, position) => {
+        Network.socket.on('player_move', (id, position) => {
             const index = Game.otherPlayers.findIndex(player => player.id === id);
             Game.otherPlayers[index].position = position;
         });
 
-        Game.socket.on('create_entity', serializedEntity => {
+        Network.socket.on('create_entity', serializedEntity => {
             serializedEntity = JSON.parse(serializedEntity);
 
             const entity = Game.addEntity();
@@ -126,10 +126,10 @@ export class Game {
             deserializeProperties(serializedEntity, entity);
         });
 
-        Game.socket.on('projectile_hit', (projectileID, targetID) => {
+        Network.socket.on('projectile_hit', (projectileID, targetID) => {
             Game.entities[Game.entities.findIndex(x => x.id === projectileID)].destroyed = true;
 
-            if (targetID === Game.socket.id) {
+            if (targetID === Network.socket.id) {
                 ++Game.player.getComponent(Player).hitsTaken;
             } else {
                 const index = Game.otherPlayers.findIndex(player => player.id === targetID);
@@ -137,7 +137,7 @@ export class Game {
             }
         });
 
-        Game.socket.on('player_disconnected', id => {
+        Network.socket.on('player_disconnected', id => {
             const index = Game.otherPlayers.findIndex(player => player.id === id);
             Game.otherPlayers.splice(index, 1);
         });
@@ -150,7 +150,7 @@ export class Game {
         );
 
         // Set the player's initial position on the server
-        Game.socket.emit('player_move', Game.player.position);
+        Network.socket.emit('player_move', Game.player.position);
 
         // TODO: socket.id is undefined initially. Perhaps only start once it is defined?
         requestAnimationFrame(this.#update);
@@ -175,7 +175,7 @@ export class Game {
             }
         }
 
-        Game.socket.emit('player_move', Game.player.position);
+        Network.socket.emit('player_move', Game.player.position);
 
         Game.context.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
 

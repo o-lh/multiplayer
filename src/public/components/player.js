@@ -1,6 +1,7 @@
 import { Component } from "../component.js";
 import { Game } from "../game.js";
 import { Input } from "../input.js";
+import { Network } from "../network.js";
 import { Projectile } from "./projectile.js";
 import { Time } from "../time.js";
 import { Vector2 } from "../vector2.js";
@@ -46,7 +47,7 @@ export class Player extends Component {
                 const entity = Game.addEntity();
 
                 entity.addComponent(Projectile).init(
-                    Game.socket.id,
+                    Network.socket.id,
                     Vector2.add(
                         structuredClone(this.entity.position),
                         Vector2.multiplyScalar(direction, Game.PLAYER_RADIUS)
@@ -56,7 +57,7 @@ export class Player extends Component {
                 );
 
                 // TODO: CreateNetworkObject function?
-                Game.socket.emit('create_entity',
+                Network.socket.emit('create_entity',
                     JSON.stringify(structuredClone(entity), (key, value) => {
                         if (key === '') delete value.destroyed;
 
