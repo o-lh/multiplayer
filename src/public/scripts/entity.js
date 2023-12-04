@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from './uuid/index.js';
+import { v4 as uuidv4 } from '../uuid/index.js';
 
 import { Vector2 } from './vector2.js';
 
