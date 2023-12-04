@@ -26,10 +26,8 @@ export class Game {
     /** @type {Projectile[]} */
     static projectiles = [];
     static PLAYER_SPEED = 4;
-    static playerPosition = new Vector2(
-        (Math.random() * Game.CANVAS_WORLD_SPACE_WIDTH) - Game.CANVAS_WORLD_SPACE_WIDTH / 2,
-        (Math.random() * Game.CANVAS_WORLD_SPACE_HEIGHT) - Game.CANVAS_WORLD_SPACE_HEIGHT / 2
-    );
+    /** @type {Entity} */
+    static player;
 
     static worldSpacePointToScreenSpace(point) {
         return new Vector2(
@@ -154,14 +152,18 @@ export class Game {
             Game.otherPlayers.splice(index, 1);
         });
 
-        // Set the player's initial position on the server
-        Game.socket.emit('player_move', Game.playerPosition);
+        this.player = this.addEntity();
+        this.player.addComponent(Player).init();
+        this.player.position = new Vector2(
+            (Math.random() * this.CANVAS_WORLD_SPACE_WIDTH) - this.CANVAS_WORLD_SPACE_WIDTH / 2,
+            (Math.random() * this.CANVAS_WORLD_SPACE_HEIGHT) - this.CANVAS_WORLD_SPACE_HEIGHT / 2
+        );
 
-        const player = this.addEntity();
-        player.addComponent(Player).init();
+        // Set the player's initial position on the server
+        Game.socket.emit('player_move', Game.player.position);
 
         // TODO: socket.id is undefined initially. Perhaps only start once it is defined?
-        requestAnimationFrame(Game.#update);
+        requestAnimationFrame(this.#update);
     }
 
     /**
@@ -184,22 +186,22 @@ export class Game {
         }
 
         if (Input.keyHeld('KeyW') || Input.keyHeld('ArrowUp'))
-            Game.playerPosition.y -= Game.PLAYER_SPEED * Time.deltaTime;
+            Game.player.position.y -= Game.PLAYER_SPEED * Time.deltaTime;
         if (Input.keyHeld('KeyD') || Input.keyHeld('ArrowRight'))
-            Game.playerPosition.x += Game.PLAYER_SPEED * Time.deltaTime;
+            Game.player.position.x += Game.PLAYER_SPEED * Time.deltaTime;
         if (Input.keyHeld('KeyS') || Input.keyHeld('ArrowDown'))
-            Game.playerPosition.y += Game.PLAYER_SPEED * Time.deltaTime;
+            Game.player.position.y += Game.PLAYER_SPEED * Time.deltaTime;
         if (Input.keyHeld('KeyA') || Input.keyHeld('ArrowLeft'))
-            Game.playerPosition.x -= Game.PLAYER_SPEED * Time.deltaTime;
+            Game.player.position.x -= Game.PLAYER_SPEED * Time.deltaTime;
 
-        if (Game.playerPosition.y - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
-            Game.playerPosition.y = -Game.CANVAS_WORLD_SPACE_HEIGHT / 2 + Game.PLAYER_RADIUS;
-        if (Game.playerPosition.x + Game.PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_WIDTH / 2)
-            Game.playerPosition.x = Game.CANVAS_WORLD_SPACE_WIDTH / 2 - Game.PLAYER_RADIUS;
-        if (Game.playerPosition.y + Game.PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
-            Game.playerPosition.y = Game.CANVAS_WORLD_SPACE_HEIGHT / 2 - Game.PLAYER_RADIUS;
-        if (Game.playerPosition.x - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_WIDTH / 2)
-            Game.playerPosition.x = -Game.CANVAS_WORLD_SPACE_WIDTH / 2 + Game.PLAYER_RADIUS;
+        if (Game.player.position.y - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
+            Game.player.position.y = -Game.CANVAS_WORLD_SPACE_HEIGHT / 2 + Game.PLAYER_RADIUS;
+        if (Game.player.position.x + Game.PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_WIDTH / 2)
+            Game.player.position.x = Game.CANVAS_WORLD_SPACE_WIDTH / 2 - Game.PLAYER_RADIUS;
+        if (Game.player.position.y + Game.PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
+            Game.player.position.y = Game.CANVAS_WORLD_SPACE_HEIGHT / 2 - Game.PLAYER_RADIUS;
+        if (Game.player.position.x - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_WIDTH / 2)
+            Game.player.position.x = -Game.CANVAS_WORLD_SPACE_WIDTH / 2 + Game.PLAYER_RADIUS;
 
         if (Input.mouseHeld(0)) {
             if (Game.attackT <= 0) {
@@ -210,14 +212,14 @@ export class Game {
                     )
                 );
 
-                const direction = Vector2.subtract(clickPosition, Game.playerPosition).normalized;
+                const direction = Vector2.subtract(clickPosition, Game.player.position).normalized;
 
                 const entity = Game.addEntity();
 
                 entity.addComponent(Projectile).init(
                     Game.socket.id,
                     Vector2.add(
-                        structuredClone(Game.playerPosition),
+                        structuredClone(Game.player.position),
                         Vector2.multiplyScalar(direction, Game.PLAYER_RADIUS)
                     ),
                     direction,
@@ -243,7 +245,7 @@ export class Game {
             }
         }
 
-        Game.socket.emit('player_move', Game.playerPosition);
+        Game.socket.emit('player_move', Game.player.position);
 
         Game.context.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
 
@@ -262,7 +264,7 @@ export class Game {
             Game.context.fill();
         }
 
-        const playerPos = Game.worldSpacePointToScreenSpace(Game.playerPosition);
+        const playerPos = Game.worldSpacePointToScreenSpace(Game.player.position);
 
         Game.context.beginPath();
         Game.context.arc(playerPos.x, playerPos.y, Game.playerRadiusScreenSpace, 0, 2 * Math.PI, false);
