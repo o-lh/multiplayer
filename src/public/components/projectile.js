@@ -47,8 +47,8 @@ export class Projectile extends Component {
                     player.position,
                     Game.PLAYER_RADIUS
                 )) {
-                    Game.socket.emit('projectile_hit', this.id, player.id);
-                    this.destroyed = true;
+                    Game.socket.emit('projectile_hit', this.entity.id, player.id);
+                    this.entity.destroyed = true;
                     ++player.hitsTaken;
                 }
             }

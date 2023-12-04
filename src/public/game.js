@@ -20,8 +20,6 @@ export class Game {
     static playerRadiusScreenSpace;
     /** @type {PlayerObject[]} */
     static otherPlayers = [];
-    /** @type {Projectile[]} */
-    static projectiles = [];
     /** @type {Entity} */
     static player;
 
@@ -126,14 +124,10 @@ export class Game {
             }
 
             deserializeProperties(serializedEntity, entity);
-
-            // TODO: Remove later
-            Game.projectiles.unshift(entity.getComponent(Projectile));
         });
 
         Game.socket.on('projectile_hit', (projectileID, targetID) => {
-            const projectileIndex = Game.projectiles.findIndex(projectile => projectile.id === projectileID);
-            Game.projectiles[projectileIndex].destroyed = true;
+            Game.entities[Game.entities.findIndex(x => x.id === projectileID)].destroyed = true;
 
             if (targetID === Game.socket.id) {
                 ++Game.player.getComponent(Player).hitsTaken;

@@ -56,8 +56,6 @@ export class Player extends Component {
                 );
 
                 // TODO: CreateNetworkObject function?
-                Game.projectiles.unshift(entity.getComponent(Projectile));
-
                 Game.socket.emit('create_entity',
                     JSON.stringify(structuredClone(entity), (key, value) => {
                         if (key === '') delete value.destroyed;
