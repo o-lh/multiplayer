@@ -18,14 +18,10 @@ export class Game {
     static PLAYER_RADIUS = 0.25;
     /** @type {number} */
     static playerRadiusScreenSpace;
-    static ATTACK_INTERVAL = 0.2;
-    static attackT = 0;
-    static hitsTaken = 0;
     /** @type {PlayerObject[]} */
     static otherPlayers = [];
     /** @type {Projectile[]} */
     static projectiles = [];
-    static PLAYER_SPEED = 4;
     /** @type {Entity} */
     static player;
 
@@ -140,7 +136,7 @@ export class Game {
             Game.projectiles[projectileIndex].destroyed = true;
 
             if (targetID === Game.socket.id) {
-                ++Game.hitsTaken;
+                ++Game.player.getComponent(Player).hitsTaken;
             } else {
                 const index = Game.otherPlayers.findIndex(player => player.id === targetID);
                 ++Game.otherPlayers[index].hitsTaken;
@@ -186,13 +182,13 @@ export class Game {
         }
 
         if (Input.keyHeld('KeyW') || Input.keyHeld('ArrowUp'))
-            Game.player.position.y -= Game.PLAYER_SPEED * Time.deltaTime;
+            Game.player.position.y -= Game.player.getComponent(Player).speed * Time.deltaTime;
         if (Input.keyHeld('KeyD') || Input.keyHeld('ArrowRight'))
-            Game.player.position.x += Game.PLAYER_SPEED * Time.deltaTime;
+            Game.player.position.x += Game.player.getComponent(Player).speed * Time.deltaTime;
         if (Input.keyHeld('KeyS') || Input.keyHeld('ArrowDown'))
-            Game.player.position.y += Game.PLAYER_SPEED * Time.deltaTime;
+            Game.player.position.y += Game.player.getComponent(Player).speed * Time.deltaTime;
         if (Input.keyHeld('KeyA') || Input.keyHeld('ArrowLeft'))
-            Game.player.position.x -= Game.PLAYER_SPEED * Time.deltaTime;
+            Game.player.position.x -= Game.player.getComponent(Player).speed * Time.deltaTime;
 
         if (Game.player.position.y - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
             Game.player.position.y = -Game.CANVAS_WORLD_SPACE_HEIGHT / 2 + Game.PLAYER_RADIUS;
@@ -204,7 +200,7 @@ export class Game {
             Game.player.position.x = -Game.CANVAS_WORLD_SPACE_WIDTH / 2 + Game.PLAYER_RADIUS;
 
         if (Input.mouseHeld(0)) {
-            if (Game.attackT <= 0) {
+            if (Game.player.getComponent(Player).attackT <= 0) {
                 const clickPosition = Game.screenSpacePointToWorldSpace(
                     new Vector2(
                         Input.mousePosition.x - Game.canvas.offsetLeft,
@@ -241,7 +237,7 @@ export class Game {
                     })
                 );
 
-                Game.attackT += Game.ATTACK_INTERVAL;
+                Game.player.getComponent(Player).attackT += Game.player.getComponent(Player).attackInterval;
             }
         }
 
@@ -278,10 +274,10 @@ export class Game {
         }
 
         Game.context.fillStyle = 'rgb(0, 255, 0)';
-        Game.context.fillText(Game.hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
+        Game.context.fillText(Game.player.getComponent(Player).hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
 
-        Game.attackT -= Time.deltaTime;
-        if (Game.attackT < 0) Game.attackT = 0;
+        Game.player.getComponent(Player).attackT -= Time.deltaTime;
+        if (Game.player.getComponent(Player).attackT < 0) Game.player.getComponent(Player).attackT = 0;
 
         // TODO: Untie game logic from frame rate
         requestAnimationFrame(Game.#update);
