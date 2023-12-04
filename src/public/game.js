@@ -18,8 +18,6 @@ export class Game {
     static PLAYER_RADIUS = 0.25;
     /** @type {number} */
     static playerRadiusScreenSpace;
-    static mousePosition = new Vector2();
-    static holdAttack = false;
     static ATTACK_INTERVAL = 0.2;
     static attackT = 0;
     static hitsTaken = 0;
@@ -90,21 +88,6 @@ export class Game {
         });
 
         this.#updateInput = Input.init();
-
-        addEventListener('mousedown', event => {
-            if (event.button !== 0) return;
-
-            Game.holdAttack = true;
-            Game.mousePosition.x = event.x;
-            Game.mousePosition.y = event.y;
-        });
-
-        addEventListener('mouseup', event => { if (event.button === 0) Game.holdAttack = false; });
-
-        addEventListener('mousemove', event => {
-            Game.mousePosition.x = event.x;
-            Game.mousePosition.y = event.y;
-        });
 
         Game.socket.on('player_connected', newPlayer => {
             Game.otherPlayers.push(newPlayer);
@@ -221,12 +204,12 @@ export class Game {
         if (Game.playerPosition.x - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_WIDTH / 2)
             Game.playerPosition.x = -Game.CANVAS_WORLD_SPACE_WIDTH / 2 + Game.PLAYER_RADIUS;
 
-        if (Game.holdAttack) {
+        if (Input.mouseHeld(0)) {
             if (Game.attackT <= 0) {
                 const clickPosition = Game.screenSpacePointToWorldSpace(
                     new Vector2(
-                        Game.mousePosition.x - Game.canvas.offsetLeft,
-                        Game.mousePosition.y - Game.canvas.offsetTop
+                        Input.mousePosition.x - Game.canvas.offsetLeft,
+                        Input.mousePosition.y - Game.canvas.offsetTop
                     )
                 );
 

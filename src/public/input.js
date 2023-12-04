@@ -1,3 +1,5 @@
+import { Vector2 } from "./vector2.js";
+
 export class Input {
     /** @type {string[]} */
     static #keysPressed = [];
@@ -5,6 +7,13 @@ export class Input {
     static #keysHeld = [];
     /** @type {string[]} */
     static #keysReleased = [];
+    /** @type {number[]} */
+    static #mousePressed = [];
+    /** @type {number[]} */
+    static #mouseHeld = [];
+    /** @type {number[]} */
+    static #mouseReleased = [];
+    static #mousePosition = new Vector2();
 
     static init() {
         addEventListener('keydown', event => {
@@ -19,9 +28,30 @@ export class Input {
             this.#keysHeld.splice(this.#keysHeld.findIndex(x => x === event.code), 1);
         });
 
+        addEventListener('mousedown', event => {
+            this.#mousePressed.push(event.button);
+            this.#mouseHeld.push(event.button);
+            this.#mousePosition.x = event.x;
+            this.#mousePosition.y = event.y;
+        });
+
+        addEventListener('mouseup', event => {
+            this.#mouseReleased.push(event.button);
+            this.#mouseHeld.splice(this.#mouseHeld.findIndex(x => x === event.button), 1);
+            this.#mousePosition.x = event.x;
+            this.#mousePosition.y = event.y;
+        });
+
+        addEventListener('mousemove', event => {
+            this.#mousePosition.x = event.x;
+            this.#mousePosition.y = event.y;
+        });
+
         return () => {
             this.#keysPressed = [];
             this.#keysReleased = [];
+            this.#mousePressed = [];
+            this.#mouseReleased = [];
         };
     }
 
@@ -44,5 +74,30 @@ export class Input {
      */
     static keyReleased(keyCode) {
         return this.#keysReleased.includes(keyCode);
+    }
+
+    /**
+     * @param {number} mouseButton
+     */
+    static mousePressed(mouseButton) {
+        return this.#mousePressed.includes(mouseButton);
+    }
+
+    /**
+     * @param {number} mouseButton
+     */
+    static mouseHeld(mouseButton) {
+        return this.#mouseHeld.includes(mouseButton);
+    }
+
+    /**
+     * @param {number} mouseButton
+     */
+    static mouseReleased(mouseButton) {
+        return this.#mouseReleased.includes(mouseButton);
+    }
+
+    static get mousePosition() {
+        return this.#mousePosition;
     }
 }
