@@ -26,7 +26,6 @@ export class Game {
     /** @type {Projectile[]} */
     static projectiles = [];
     static PLAYER_SPEED = 4;
-    static playerPrevious = new Vector2();
     static playerPosition = new Vector2(
         (Math.random() * Game.CANVAS_WORLD_SPACE_WIDTH) - Game.CANVAS_WORLD_SPACE_WIDTH / 2,
         (Math.random() * Game.CANVAS_WORLD_SPACE_HEIGHT) - Game.CANVAS_WORLD_SPACE_HEIGHT / 2
@@ -184,8 +183,6 @@ export class Game {
             }
         }
 
-        Game.playerPrevious = structuredClone(Game.playerPosition);
-
         if (Input.keyHeld('KeyW') || Input.keyHeld('ArrowUp'))
             Game.playerPosition.y -= Game.PLAYER_SPEED * Time.deltaTime;
         if (Input.keyHeld('KeyD') || Input.keyHeld('ArrowRight'))
@@ -246,8 +243,7 @@ export class Game {
             }
         }
 
-        if (!Vector2.equal(Game.playerPosition, Game.playerPrevious))
-            Game.socket.emit('player_move', Game.playerPosition);
+        Game.socket.emit('player_move', Game.playerPosition);
 
         Game.context.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
 
