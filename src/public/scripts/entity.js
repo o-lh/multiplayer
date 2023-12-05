@@ -1,15 +1,19 @@
-import { v4 as uuidv4 } from '../uuid/index.js';
+import { IDManager } from './id-manager.js';
 
 import { Vector2 } from './vector2.js';
 
 export class Entity {
-    constructor() {
-        /** @type {string} */
-        this.id = uuidv4();
-        this.destroyed = false;
-        this.position = new Vector2();
-        /** @type {Component[]} */
-        this.components = [];
+    id;
+    destroyed = false;
+    position = new Vector2();
+    /** @type {Component[]} */
+    components = [];
+
+    /**
+     * @param {string} [id]
+     */
+    constructor(id) {
+        this.id = id ? id : IDManager.newID();
     }
 
     /**
