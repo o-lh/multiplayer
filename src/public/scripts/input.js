@@ -20,7 +20,7 @@ export class Input {
             if (event.repeat) return;
 
             this.#keysPressed.push(event.code);
-            this.#keysHeld.push(event.code);
+            if (!this.#keysHeld.includes(event.code)) this.#keysHeld.push(event.code);
         });
 
         addEventListener('keyup', event => {
@@ -30,7 +30,7 @@ export class Input {
 
         addEventListener('mousedown', event => {
             this.#mousePressed.push(event.button);
-            this.#mouseHeld.push(event.button);
+            if (!this.#mouseHeld.includes(event.button)) this.#mouseHeld.push(event.button);
             this.#mousePosition.x = event.x;
             this.#mousePosition.y = event.y;
         });
