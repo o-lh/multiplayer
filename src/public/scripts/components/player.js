@@ -1,3 +1,4 @@
+import { Camera } from "../camera.js";
 import { Component } from "../component.js";
 import { Game } from "../game.js";
 import { Input } from "../input.js";
@@ -35,7 +36,7 @@ export class Player extends Component {
 
         if (Input.mouseHeld(0)) {
             if (this.attackT <= 0) {
-                const clickPosition = Game.screenSpacePointToWorldSpace(
+                const clickPosition = Camera.screenSpacePointToWorldSpace(
                     new Vector2(
                         Input.mousePosition.x - Game.canvas.offsetLeft,
                         Input.mousePosition.y - Game.canvas.offsetTop
@@ -78,7 +79,7 @@ export class Player extends Component {
     }
 
     render() {
-        const playerPos = Game.worldSpacePointToScreenSpace(this.entity.position);
+        const playerPos = Camera.worldSpacePointToScreenSpace(this.entity.position);
 
         Game.context.beginPath();
         Game.context.arc(playerPos.x, playerPos.y, Game.playerRadiusScreenSpace, 0, 2 * Math.PI, false);

@@ -1,3 +1,4 @@
+import { Camera } from "../camera.js";
 import { Component } from "../component.js";
 import { Game } from "../game.js";
 import { Network } from "../network.js";
@@ -57,8 +58,8 @@ export class Projectile extends Component {
     }
 
     render() {
-        const lineStart = Game.worldSpacePointToScreenSpace(this.tail);
-        const lineEnd = Game.worldSpacePointToScreenSpace(this.head);
+        const lineStart = Camera.worldSpacePointToScreenSpace(this.tail);
+        const lineEnd = Camera.worldSpacePointToScreenSpace(this.head);
 
         Game.context.beginPath();
         Game.context.strokeStyle = 'rgb(255, 255, 255)';

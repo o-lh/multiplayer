@@ -1,4 +1,5 @@
 // TODO: import Engine?
+import { Camera } from './camera.js';
 import { Entity } from './entity.js';
 import { Input } from './input.js';
 import { Network } from './network.js';
@@ -21,25 +22,6 @@ export class Game {
     static otherPlayers = [];
     /** @type {Entity} */
     static player;
-
-    static worldSpacePointToScreenSpace(point) {
-        return new Vector2(
-            Game.canvas.width / 2 + point.x * Game.canvas.width / Game.CANVAS_WORLD_SPACE_WIDTH,
-            Game.canvas.height / 2 + point.y * Game.canvas.height / Game.CANVAS_WORLD_SPACE_HEIGHT
-        );
-    }
-
-    // TODO: What about for a non-square canvas?
-    static worldSpaceLengthToScreenSpace(length) {
-        return length * Game.canvas.height / Game.CANVAS_WORLD_SPACE_HEIGHT;
-    }
-
-    static screenSpacePointToWorldSpace(point) {
-        return new Vector2(
-            point.x / Game.canvas.width * Game.CANVAS_WORLD_SPACE_WIDTH - Game.CANVAS_WORLD_SPACE_WIDTH / 2,
-            point.y / Game.canvas.height * Game.CANVAS_WORLD_SPACE_HEIGHT - Game.CANVAS_WORLD_SPACE_HEIGHT / 2
-        );
-    }
     // TODO: End the mess zone
 
     /** @type {function} */
@@ -62,7 +44,7 @@ export class Game {
         Game.context.font = '20px sans-serif';
         Game.context.textAlign = 'center';
 
-        Game.playerRadiusScreenSpace = Game.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS);
+        Game.playerRadiusScreenSpace = Camera.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS);
 
         addEventListener('contextmenu', event => event.preventDefault());
 
@@ -74,7 +56,7 @@ export class Game {
             Game.context.font = '20px sans-serif';
             Game.context.textAlign = 'center';
 
-            Game.playerRadiusScreenSpace = Game.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS);
+            Game.playerRadiusScreenSpace = Camera.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS);
         });
 
         Network.init();
@@ -126,7 +108,7 @@ export class Game {
         }
 
         for (const player of Game.otherPlayers) {
-            const playerPos = Game.worldSpacePointToScreenSpace(player.position);
+            const playerPos = Camera.worldSpacePointToScreenSpace(player.position);
 
             Game.context.beginPath();
             Game.context.arc(playerPos.x, playerPos.y, Game.playerRadiusScreenSpace, 0, 2 * Math.PI, false);
@@ -135,7 +117,7 @@ export class Game {
         }
 
         for (const player of Game.otherPlayers) {
-            const playerPos = Game.worldSpacePointToScreenSpace(player.position);
+            const playerPos = Camera.worldSpacePointToScreenSpace(player.position);
             Game.context.fillStyle = 'rgb(255, 0, 0)';
             Game.context.fillText(player.hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
         }
