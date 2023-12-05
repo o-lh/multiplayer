@@ -26,10 +26,6 @@ export class Entity {
         return addedComponent;
     }
 
-    destroy() {
-        this.destroyed = true;
-    }
-
     /**
      * @param {class} component
      * @returns {Component | undefined}
