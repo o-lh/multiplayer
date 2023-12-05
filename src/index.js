@@ -30,6 +30,8 @@ app.use('/uuid', express.static(join(__dirname, '..', 'node_modules', 'uuid', 'd
 const players = [];
 
 io.on('connection', (socket) => {
+    socket.emit('connected');
+
     const player = new PlayerObject(socket.id, new Vector2(), 0);
 
     // Broadcast new player to all other players

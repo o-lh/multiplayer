@@ -142,18 +142,19 @@ export class Game {
             Game.otherPlayers.splice(index, 1);
         });
 
-        this.player = this.addEntity();
-        this.player.addComponent(Player).init();
-        this.player.position = new Vector2(
-            (Math.random() * this.CANVAS_WORLD_SPACE_WIDTH) - this.CANVAS_WORLD_SPACE_WIDTH / 2,
-            (Math.random() * this.CANVAS_WORLD_SPACE_HEIGHT) - this.CANVAS_WORLD_SPACE_HEIGHT / 2
-        );
+        Network.socket.on('connected', () => {
+            this.player = this.addEntity();
+            this.player.addComponent(Player).init();
+            this.player.position = new Vector2(
+                (Math.random() * this.CANVAS_WORLD_SPACE_WIDTH) - this.CANVAS_WORLD_SPACE_WIDTH / 2,
+                (Math.random() * this.CANVAS_WORLD_SPACE_HEIGHT) - this.CANVAS_WORLD_SPACE_HEIGHT / 2
+            );
 
-        // Set the player's initial position on the server
-        Network.socket.emit('player_move', Game.player.position);
+            // Set the player's initial position on the server
+            Network.socket.emit('player_move', Game.player.position);
 
-        // TODO: socket.id is undefined initially. Perhaps only start once it is defined?
-        requestAnimationFrame(this.#update);
+            requestAnimationFrame(this.#update);
+        });
     }
 
     /**
