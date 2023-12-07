@@ -27,7 +27,11 @@ app.use(express.static(join(__dirname, 'public')));
 /** @type {PlayerObject[]} */
 const players = [];
 
+const sockets = [];
+
 io.on('connection', (socket) => {
+    sockets.push(socket);
+
     socket.emit('connected');
 
     const player = new PlayerObject(socket.id, new Vector2(), 0);
@@ -68,3 +72,32 @@ io.on('connection', (socket) => {
 server.listen(1337, () => {
     console.log('Listening on port 1337');
 });
+
+let count = 0;
+
+function update() {
+    const origin = new Vector2(Math.random() * 10 - 5, Math.random() * 10 - 5);
+    const direction = new Vector2(Math.random() * 2 - 1, Math.random() * 2 - 1).normalized;
+
+    for (const socket of sockets) {
+        socket.emit('create_entity', `{
+"id":"server-${count}",
+"position":{"constructorName":"Vector2","x":0,"y":0},
+"components":[
+{
+"constructorName":"Projectile",
+"owner":"server",
+"origin":{"constructorName":"Vector2","x":${origin.x},"y":${origin.y}},
+"direction":{"constructorName":"Vector2","x":${direction.x},"y":${direction.y}},
+"speed":50,
+"head":{"constructorName":"Vector2","x":${origin.x},"y":${origin.y}},
+"tail":{"constructorName":"Vector2","x":${origin.x},"y":${origin.y}}
+}
+]
+}`);
+    }
+
+    ++count;
+}
+
+setInterval(update, 1000);
