@@ -27,6 +27,9 @@ app.use(express.static(join(__dirname, 'public')));
 /** @type {PlayerObject[]} */
 const players = [];
 
+/** @type {string[]} */
+const serializedEntities = [];
+
 const sockets = [];
 
 io.on('connection', (socket) => {
@@ -52,7 +55,8 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('player_move', socket.id, position);
     });
 
-    socket.on('create_entity', entity => {
+    socket.on('create_entity', (entity, saveToServer) => {
+        if (saveToServer) serializedEntities.push(entity);
         socket.broadcast.emit('create_entity', entity);
     });
 

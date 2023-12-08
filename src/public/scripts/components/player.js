@@ -58,7 +58,8 @@ export class Player extends Component {
                 );
 
                 // TODO: CreateNetworkObject function?
-                Network.socket.emit('create_entity',
+                Network.socket.emit(
+                    'create_entity',
                     JSON.stringify(structuredClone(entity), (key, value) => {
                         if (key === '') delete value.destroyed;
 
@@ -67,7 +68,8 @@ export class Player extends Component {
                         }
 
                         return value;
-                    })
+                    }),
+                    false
                 );
 
                 this.attackT += this.attackInterval;
