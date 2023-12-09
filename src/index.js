@@ -60,15 +60,17 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('create_entity', entity);
     });
 
-    socket.on('projectile_hit', (projectileID, targetID) => {
+    socket.on('projectile_hit', (socketID, projectileID, targetID) => {
         const index = players.findIndex(player => player.id === targetID);
         if (index !== -1) ++players[index].hitsTaken;
-        socket.broadcast.emit('projectile_hit', projectileID, targetID);
+        socket.broadcast.emit('projectile_hit', socketID, projectileID, targetID);
     });
 
     socket.on('disconnect', () => {
         const index = players.findIndex(player => player.id === socket.id);
         players.splice(index, 1);
+        const entityIndex = serializedEntities.findIndex(x => JSON.parse(x).socketID === socket.id);
+        serializedEntities.splice(entityIndex, 1);
         socket.broadcast.emit('player_disconnected', socket.id);
     })
 })

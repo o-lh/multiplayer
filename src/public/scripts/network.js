@@ -55,8 +55,10 @@ export class Network {
             deserializeProperties(serializedEntity, entity);
         });
 
-        Network.socket.on('projectile_hit', (projectileID, targetID) => {
-            Game.entities[Game.entities.findIndex(x => x.id === projectileID)].destroyed = true;
+        Network.socket.on('projectile_hit', (socketID, projectileID, targetID) => {
+            Game.entities[
+                Game.entities.findIndex(x => x.socketID === socketID && x.id === projectileID)
+            ].destroyed = true;
 
             if (targetID === Network.socketID) {
                 ++Game.player.getComponent(Player).hitsTaken;

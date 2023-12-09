@@ -1,19 +1,23 @@
-import { IDManager } from './id-manager.js';
-
+import { Network } from './network.js';
 import { Vector2 } from './vector2.js';
 
 export class Entity {
+    static nextID = 0;
+
     id;
+    socketID;
     destroyed = false;
     position = new Vector2();
     /** @type {Component[]} */
     components = [];
 
     /**
-     * @param {string} [id]
+     * @param {number} [id]
+     * @param {string} [socketID]
      */
-    constructor(id) {
-        this.id = id ? id : IDManager.newID();
+    constructor(id, socketID) {
+        this.id = id ? id : Entity.nextID++;
+        this.socketID = socketID ? socketID : Network.socketID;
     }
 
     /**
