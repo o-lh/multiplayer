@@ -8,7 +8,7 @@ export class Network {
     static socket = io();
 
     // TODO: Separate into #componentConstructors and #objectConstructors
-    static #constructors = { Vector2: Vector2, Projectile: Projectile };
+    static #constructors = { Vector2: Vector2, Projectile: Projectile, Player: Player };
 
     // TODO: Singleton
     static init() {
