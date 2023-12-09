@@ -61,8 +61,6 @@ export class Player extends Component {
                 Network.socket.emit(
                     'create_entity',
                     JSON.stringify(structuredClone(entity), (key, value) => {
-                        if (key === '') delete value.destroyed;
-
                         if (key === 'components') for (const component of value) {
                             delete component.entity;
                         }
