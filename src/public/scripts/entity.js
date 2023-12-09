@@ -12,11 +12,11 @@ export class Entity {
     components = [];
 
     /**
-     * @param {number} [id]
+     * @param {string} [id]
      * @param {string} [owner]
      */
     constructor(id, owner) {
-        this.id = id ? id : Entity.nextID++;
+        this.id = id ? id : `${Network.socketID}-${Entity.nextID++}`;
         this.owner = owner ? owner : Network.socketID;
     }
 
