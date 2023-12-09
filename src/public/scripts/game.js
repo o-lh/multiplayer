@@ -30,10 +30,12 @@ export class Game {
     static entities = [];
 
     /**
+     * @param {string} [id]
+     * @param {string} [owner]
      * @returns {Entity}
      */
-    static addEntity() {
-        return this.entities[this.entities.push(new Entity()) - 1];
+    static addEntity(id, owner) {
+        return this.entities[this.entities.push(new Entity(id, owner)) - 1];
     }
 
     // TODO: destroyEntity method

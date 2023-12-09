@@ -21,7 +21,7 @@ export class Network {
         Network.socket.on('create_entity', serializedEntity => {
             serializedEntity = JSON.parse(serializedEntity);
 
-            const entity = Game.addEntity();
+            const entity = Game.addEntity(serializedEntity.id, serializedEntity.owner);
 
             // TODO: Move this outside of this function (entity needs to be in scope)
             function deserializeProperties(serializedObject, deserializedObject) {
@@ -87,6 +87,14 @@ export class Network {
             }),
             saveToServer
         );
+    }
+
+    /**
+     * @param {string} id
+     * @param {Vector2} newPosition
+     */
+    static moveEntity(id, newPosition) {
+        this.socket.emit('move_entity', id, newPosition);
     }
 
     /**
