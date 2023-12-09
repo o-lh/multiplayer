@@ -57,18 +57,7 @@ export class Player extends Component {
                     50
                 );
 
-                // TODO: CreateNetworkObject function?
-                Network.socket.emit(
-                    'create_entity',
-                    JSON.stringify(structuredClone(entity), (key, value) => {
-                        if (key === 'components') for (const component of value) {
-                            delete component.entity;
-                        }
-
-                        return value;
-                    }),
-                    false
-                );
+                Network.createEntity(entity, false);
 
                 this.attackT += this.attackInterval;
             }

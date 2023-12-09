@@ -73,17 +73,7 @@ export class Game {
 
             // Set the player's initial position on the server
             Network.socket.emit('player_move', Game.player.position);
-            Network.socket.emit(
-                'create_entity',
-                JSON.stringify(structuredClone(Game.player), (key, value) => {
-                    if (key === 'components') for (const component of value) {
-                        delete component.entity;
-                    }
-
-                    return value;
-                }),
-                true
-            );
+            Network.createEntity(Game.player, true);
 
             requestAnimationFrame(this.#update);
         });

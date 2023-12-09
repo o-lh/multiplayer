@@ -1,3 +1,4 @@
+import { Entity } from "./entity.js";
 import { Game } from "./game.js";
 import { Player } from "./components/player.js";
 import { Projectile } from "./components/projectile.js";
@@ -72,6 +73,21 @@ export class Network {
             const index = Game.otherPlayers.findIndex(player => player.id === id);
             Game.otherPlayers.splice(index, 1);
         });
+    }
+
+    /**
+     * @param {Entity} entity
+     * @param {boolean} saveToServer
+     */
+    static createEntity(entity, saveToServer) {
+        this.socket.emit(
+            'create_entity',
+            JSON.stringify(structuredClone(entity), (key, value) => {
+                if (key === 'components') for (const component of value) delete component.entity;
+                return value;
+            }),
+            saveToServer
+        );
     }
 
     /**
