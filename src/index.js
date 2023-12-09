@@ -6,10 +6,6 @@ import { Server } from 'socket.io';
 import express from 'express';
 import favicon from 'serve-favicon';
 
-// TODO: /shared or /common folder?
-import { PlayerObject } from './public/scripts/player-object.js'
-import { Vector2 } from './public/scripts/vector2.js'
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app = express();
@@ -24,36 +20,23 @@ app.use(express.static(join(__dirname, 'public')));
 // - https://socket.io/docs/v4/client-options/#auth
 // - https://socket.io/how-to/deal-with-cookies
 
-/** @type {PlayerObject[]} */
-const players = [];
-
+// TODO: /shared or /common or /engine folder?
 /** @type {string[]} */
 const serializedEntities = [];
 
-const sockets = [];
-
 io.on('connection', (socket) => {
-    sockets.push(socket);
-
     socket.emit('connected');
 
-    const player = new PlayerObject(socket.id, new Vector2(), 0);
-
-    // Broadcast new player to all other players
-    socket.broadcast.emit('player_connected', player);
-
-    // Send all existing players to new player
-    for (let otherPlayer of players) {
-        socket.emit('player_connected', otherPlayer);
+    for (const serializedEntity of serializedEntities) {
+        socket.emit('create_entity', serializedEntity);
     }
 
-    players.push(player);
-
-    socket.on('player_move', position => {
-        const index = players.findIndex(player => player.id === socket.id);
-        players[index].position = position;
-        socket.broadcast.emit('player_move', socket.id, position);
-    });
+    // TODO
+    // socket.on('player_move', position => {
+    //     const index = players.findIndex(player => player.id === socket.id);
+    //     players[index].position = position;
+    //     socket.broadcast.emit('player_move', socket.id, position);
+    // });
 
     socket.on('create_entity', (entity, saveToServer) => {
         if (saveToServer) serializedEntities.push(entity);
@@ -61,16 +44,14 @@ io.on('connection', (socket) => {
     });
 
     socket.on('projectile_hit', (socketID, projectileID, targetID) => {
-        const index = players.findIndex(player => player.id === targetID);
-        if (index !== -1) ++players[index].hitsTaken;
+        // TODO: Modify entity on the server as well
         socket.broadcast.emit('projectile_hit', socketID, projectileID, targetID);
     });
 
     socket.on('disconnect', () => {
-        const index = players.findIndex(player => player.id === socket.id);
-        players.splice(index, 1);
-        const entityIndex = serializedEntities.findIndex(x => JSON.parse(x).socketID === socket.id);
-        serializedEntities.splice(entityIndex, 1);
+        // TODO: Only remove the entity tagged as "Player"
+        const index = serializedEntities.findIndex(x => JSON.parse(x).socketID === socket.id);
+        serializedEntities.splice(index, 1);
         socket.broadcast.emit('player_disconnected', socket.id);
     })
 })

@@ -16,6 +16,8 @@ export class Player extends Component {
     }
 
     update() {
+        if (!Network.owns(this.entity)) return;
+
         if (Input.keyHeld('KeyW') || Input.keyHeld('ArrowUp'))
             this.entity.position.y -= this.speed * Time.deltaTime;
         if (Input.keyHeld('KeyD') || Input.keyHeld('ArrowRight'))
@@ -68,14 +70,28 @@ export class Player extends Component {
     }
 
     render() {
+        // TODO: No need to calculate this every frame
+        const colour = Network.owns(this.entity) ? 'rgb(0, 255, 0)' : 'rgb(255, 0, 0)';
+
         const playerPos = Camera.worldSpacePointToScreenSpace(this.entity.position);
 
         Game.context.beginPath();
-        Game.context.arc(playerPos.x, playerPos.y, Game.playerRadiusScreenSpace, 0, 2 * Math.PI, false);
-        Game.context.fillStyle = 'rgb(0, 255, 0)';
+        Game.context.arc(
+            playerPos.x,
+            playerPos.y,
+            Game.playerRadiusScreenSpace,
+            0,
+            2 * Math.PI,
+            false
+        );
+        Game.context.fillStyle = colour;
         Game.context.fill();
 
-        Game.context.fillStyle = 'rgb(0, 255, 0)';
-        Game.context.fillText(this.hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
+        Game.context.fillStyle = colour;
+        Game.context.fillText(
+            this.hitsTaken,
+            playerPos.x,
+            playerPos.y - Game.playerRadiusScreenSpace - 5
+        );
     }
 }

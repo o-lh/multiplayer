@@ -13,10 +13,6 @@ export class Network {
 
     // TODO: Singleton
     static init() {
-        Network.socket.on('player_connected', newPlayer => {
-            Game.otherPlayers.push(newPlayer);
-        });
-
         Network.socket.on('player_move', (id, position) => {
             const index = Game.otherPlayers.findIndex(player => player.id === id);
             Game.otherPlayers[index].position = position;
@@ -69,9 +65,12 @@ export class Network {
             }
         });
 
-        Network.socket.on('player_disconnected', id => {
-            const index = Game.otherPlayers.findIndex(player => player.id === id);
-            Game.otherPlayers.splice(index, 1);
+        // TODO: destroy_entity
+        Network.socket.on('player_disconnected', socketID => {
+            // TODO: Only remove the entity tagged as "Player"
+            // TODO: Game.destroyEntity
+            const index = Game.entities.findIndex(x => x.socketID === socketID);
+            Game.entities.splice(index, 1);
         });
     }
 
@@ -88,6 +87,14 @@ export class Network {
             }),
             saveToServer
         );
+    }
+
+    /**
+     * @param {Entity} entity
+     * @returns {boolean}
+     */
+    static owns(entity) {
+        return entity.socketID === this.socketID;
     }
 
     /**

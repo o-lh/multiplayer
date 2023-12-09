@@ -18,8 +18,6 @@ export class Game {
     static PLAYER_RADIUS = 0.25;
     /** @type {number} */
     static playerRadiusScreenSpace;
-    /** @type {PlayerObject[]} */
-    static otherPlayers = [];
     /** @type {Entity} */
     static player;
     // TODO: End the mess zone
@@ -27,15 +25,18 @@ export class Game {
     /** @type {function} */
     static #updateInput;
 
+    // TODO: ECS World class?
     /** @type {Entity[]} */
     static entities = [];
 
     /**
-     * @param {Entity} entity
+     * @returns {Entity}
      */
     static addEntity() {
         return this.entities[this.entities.push(new Entity()) - 1];
     }
+
+    // TODO: destroyEntity method
 
     static run() {
         Game.canvas.width = Game.smallerDimension;
@@ -106,21 +107,6 @@ export class Game {
             for (const component of entity.components) {
                 component.render();
             }
-        }
-
-        for (const player of Game.otherPlayers) {
-            const playerPos = Camera.worldSpacePointToScreenSpace(player.position);
-
-            Game.context.beginPath();
-            Game.context.arc(playerPos.x, playerPos.y, Game.playerRadiusScreenSpace, 0, 2 * Math.PI, false);
-            Game.context.fillStyle = 'rgb(255, 0, 0)';
-            Game.context.fill();
-        }
-
-        for (const player of Game.otherPlayers) {
-            const playerPos = Camera.worldSpacePointToScreenSpace(player.position);
-            Game.context.fillStyle = 'rgb(255, 0, 0)';
-            Game.context.fillText(player.hitsTaken, playerPos.x, playerPos.y - Game.playerRadiusScreenSpace - 5);
         }
 
         // TODO: Untie game logic from frame rate
