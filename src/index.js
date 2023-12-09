@@ -43,14 +43,14 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('create_entity', entity);
     });
 
-    socket.on('projectile_hit', (socketID, projectileID, targetID) => {
+    socket.on('projectile_hit', (owner, projectileID, targetID) => {
         // TODO: Modify entity on the server as well
-        socket.broadcast.emit('projectile_hit', socketID, projectileID, targetID);
+        socket.broadcast.emit('projectile_hit', owner, projectileID, targetID);
     });
 
     socket.on('disconnect', () => {
         // TODO: Only remove the entity tagged as "Player"
-        const index = serializedEntities.findIndex(x => JSON.parse(x).socketID === socket.id);
+        const index = serializedEntities.findIndex(x => JSON.parse(x).owner === socket.id);
         serializedEntities.splice(index, 1);
         socket.broadcast.emit('player_disconnected', socket.id);
     })

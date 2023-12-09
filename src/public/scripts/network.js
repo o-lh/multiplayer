@@ -52,9 +52,9 @@ export class Network {
             deserializeProperties(serializedEntity, entity);
         });
 
-        Network.socket.on('projectile_hit', (socketID, projectileID, targetID) => {
+        Network.socket.on('projectile_hit', (owner, projectileID, targetID) => {
             Game.entities[
-                Game.entities.findIndex(x => x.socketID === socketID && x.id === projectileID)
+                Game.entities.findIndex(x => x.owner === owner && x.id === projectileID)
             ].destroyed = true;
 
             if (targetID === Network.socketID) {
@@ -69,7 +69,7 @@ export class Network {
         Network.socket.on('player_disconnected', socketID => {
             // TODO: Only remove the entity tagged as "Player"
             // TODO: Game.destroyEntity
-            const index = Game.entities.findIndex(x => x.socketID === socketID);
+            const index = Game.entities.findIndex(x => x.owner === socketID);
             Game.entities.splice(index, 1);
         });
     }
@@ -94,7 +94,7 @@ export class Network {
      * @returns {boolean}
      */
     static owns(entity) {
-        return entity.socketID === this.socketID;
+        return entity.owner === this.socketID;
     }
 
     /**

@@ -5,7 +5,7 @@ export class Entity {
     static nextID = 0;
 
     id;
-    socketID;
+    owner;
     destroyed = false;
     position = new Vector2();
     /** @type {Component[]} */
@@ -13,11 +13,11 @@ export class Entity {
 
     /**
      * @param {number} [id]
-     * @param {string} [socketID]
+     * @param {string} [owner]
      */
-    constructor(id, socketID) {
+    constructor(id, owner) {
         this.id = id ? id : Entity.nextID++;
-        this.socketID = socketID ? socketID : Network.socketID;
+        this.owner = owner ? owner : Network.socketID;
     }
 
     /**
