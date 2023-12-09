@@ -30,7 +30,7 @@ export class Projectile extends Component {
 
         // TODO: These boundaries are hard-coded
         if (this.tail.y < -10 || this.tail.x > 10 || this.tail.y > 10 || this.tail.x < -10) {
-            this.entity.destroyed = true;
+            this.entity.destroy();
             return;
         }
 
@@ -56,7 +56,7 @@ export class Projectile extends Component {
         //                 this.entity.id,
         //                 player.id
         //             );
-        //             this.entity.destroyed = true;
+        //             this.entity.destroy();
         //             ++player.hitsTaken;
         //         }
         //     }

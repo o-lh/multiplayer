@@ -38,7 +38,12 @@ export class Game {
         return this.entities[this.entities.push(new Entity(id, owner)) - 1];
     }
 
-    // TODO: destroyEntity method
+    /**
+     * @param {string} id
+     */
+    static destroyEntity(id) {
+        Game.entities[this.entities.findIndex(x => x.id === id)].destroy();
+    }
 
     static run() {
         Game.canvas.width = Game.smallerDimension;

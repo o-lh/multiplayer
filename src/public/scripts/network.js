@@ -55,7 +55,7 @@ export class Network {
         Network.socket.on('projectile_hit', (owner, projectileID, targetID) => {
             Game.entities[
                 Game.entities.findIndex(x => x.owner === owner && x.id === projectileID)
-            ].destroyed = true;
+            ].destroy();
 
             if (targetID === Network.socketID) {
                 ++Game.player.getComponent(Player).hitsTaken;
