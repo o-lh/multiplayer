@@ -41,7 +41,7 @@ export class Projectile extends Component {
 
         if (this.#isTailPastOrigin()) this.tail = this.origin;
 
-        if (this.owner === Network.socket.id) {
+        if (this.owner === Network.socketID) {
             for (const player of Game.otherPlayers) {
                 if (Physics.lineCircleCollision(
                     this.tail,

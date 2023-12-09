@@ -4,6 +4,7 @@ import { Projectile } from "./components/projectile.js";
 import { Vector2 } from "./vector2.js";
 
 export class Network {
+    // TODO: Private
     static socket = io();
 
     // TODO: Separate into #componentConstructors and #objectConstructors
@@ -57,7 +58,7 @@ export class Network {
         Network.socket.on('projectile_hit', (projectileID, targetID) => {
             Game.entities[Game.entities.findIndex(x => x.id === projectileID)].destroyed = true;
 
-            if (targetID === Network.socket.id) {
+            if (targetID === Network.socketID) {
                 ++Game.player.getComponent(Player).hitsTaken;
             } else {
                 const index = Game.otherPlayers.findIndex(player => player.id === targetID);
@@ -69,5 +70,12 @@ export class Network {
             const index = Game.otherPlayers.findIndex(player => player.id === id);
             Game.otherPlayers.splice(index, 1);
         });
+    }
+
+    /**
+     * @returns {string}
+     */
+    static get socketID() {
+        return this.socket.id;
     }
 }
