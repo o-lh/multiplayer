@@ -81,10 +81,7 @@ export class Network {
     static createEntity(entity, saveToServer) {
         this.socket.emit(
             'create_entity',
-            JSON.stringify(structuredClone(entity), (key, value) => {
-                if (key === 'components') for (const component of value) delete component.entity;
-                return value;
-            }),
+            JSON.stringify(entity),
             saveToServer
         );
     }
