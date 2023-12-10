@@ -5,15 +5,14 @@ import { Projectile } from "./components/projectile.js";
 import { Vector2 } from "./vector2.js";
 
 export class Network {
-    // TODO: Private
-    static socket = io();
+    static #socket = io();
 
     // TODO: Separate into #componentConstructors and #objectConstructors
     static #constructors = { Vector2: Vector2, Projectile: Projectile, Player: Player };
 
     // TODO: Singleton
     static init() {
-        this.socket.on('create_entity', (serializedEntity) => {
+        this.#socket.on('create_entity', (serializedEntity) => {
             serializedEntity = JSON.parse(serializedEntity);
 
             const entity = Game.addEntity(serializedEntity.id, serializedEntity.owner);
@@ -47,15 +46,15 @@ export class Network {
             deserializeProperties(serializedEntity, entity);
         });
 
-        this.socket.on('move_entity', (id, newPosition) => {
+        this.#socket.on('move_entity', (id, newPosition) => {
             Game.getEntity(id).position = newPosition;
         });
 
-        this.socket.on('destroy_entity', (id) => {
+        this.#socket.on('destroy_entity', (id) => {
             Game.getEntity(id).destroy();
         });
 
-        this.socket.on('projectile_hit', (owner, projectileID, targetID) => {
+        this.#socket.on('projectile_hit', (owner, projectileID, targetID) => {
             Game.entities[
                 Game.entities.findIndex(x => x.owner === owner && x.id === projectileID)
             ].destroy();
@@ -73,8 +72,8 @@ export class Network {
      * @param {() => void} onConnection
      */
     static waitForConnection(onConnection) {
-        this.socket.on('connected', () => {
-            this.socket.removeAllListeners('connected');
+        this.#socket.on('connected', () => {
+            this.#socket.removeAllListeners('connected');
             onConnection();
         });
     }
@@ -84,7 +83,7 @@ export class Network {
      * @param {...any} params
      */
     static emit(message, ...params) {
-        this.socket.emit(message, ...params);
+        this.#socket.emit(message, ...params);
     }
 
     /**
@@ -94,7 +93,7 @@ export class Network {
     static createEntity(entity, saveToServer) {
         // TODO: You don't actually need to stringify the object before emitting it
         // TODO: Therefore this can also be done using Network.emit
-        this.socket.emit(
+        this.#socket.emit(
             'create_entity',
             JSON.stringify(entity),
             saveToServer
@@ -113,6 +112,6 @@ export class Network {
      * @returns {string}
      */
     static get socketID() {
-        return this.socket.id;
+        return this.#socket.id;
     }
 }
