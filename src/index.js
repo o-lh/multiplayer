@@ -39,12 +39,13 @@ io.on('connection', (socket) => {
     socket.on('move_entity', (id, newPosition) => {
         socket.broadcast.emit('move_entity', id, newPosition);
         const index = serializedEntities.findIndex(x => JSON.parse(x).id === id);
-        if (index !== -1) {
-            // TODO: Store entities properly on the server
-            const entity = JSON.parse(serializedEntities[index]);
-            entity.position = newPosition;
-            serializedEntities[index] = JSON.stringify(entity);
-        }
+
+        if (index === -1) return;
+
+        // TODO: Store entities properly on the server
+        const entity = JSON.parse(serializedEntities[index]);
+        entity.position = newPosition;
+        serializedEntities[index] = JSON.stringify(entity);
     });
 
     socket.on('projectile_hit', (owner, projectileID, targetID) => {
@@ -55,6 +56,9 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         // TODO: Only remove the entity tagged as "Player"
         const index = serializedEntities.findIndex(x => JSON.parse(x).owner === socket.id);
+
+        if (index === -1) return;
+
         socket.broadcast.emit('destroy_entity', JSON.parse(serializedEntities[index]).id);
         serializedEntities.splice(index, 1);
     })
