@@ -22,7 +22,7 @@ export class Game {
     static player;
     // TODO: End the mess zone
 
-    /** @type {function} */
+    /** @type {() => void} */
     static #updateInput;
 
     // TODO: ECS World class?
@@ -67,22 +67,22 @@ export class Game {
             Game.playerRadiusScreenSpace = Camera.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS);
         });
 
-        Network.init();
         this.#updateInput = Input.init();
+        Network.init();
+        Network.waitForConnection(this.#start);
+    }
 
-        // TODO: Where should this belong?
-        Network.socket.on('connected', () => {
-            this.player = this.addEntity();
-            this.player.addComponent(Player).init();
-            this.player.position = new Vector2(
-                (Math.random() * this.CANVAS_WORLD_SPACE_WIDTH) - this.CANVAS_WORLD_SPACE_WIDTH / 2,
-                (Math.random() * this.CANVAS_WORLD_SPACE_HEIGHT) - this.CANVAS_WORLD_SPACE_HEIGHT / 2
-            );
+    static #start() {
+        Game.player = Game.addEntity();
+        Game.player.addComponent(Player).init();
+        Game.player.position = new Vector2(
+            (Math.random() * Game.CANVAS_WORLD_SPACE_WIDTH) - Game.CANVAS_WORLD_SPACE_WIDTH / 2,
+            (Math.random() * Game.CANVAS_WORLD_SPACE_HEIGHT) - Game.CANVAS_WORLD_SPACE_HEIGHT / 2
+        );
 
-            Network.createEntity(Game.player, true);
+        Network.createEntity(Game.player, true);
 
-            requestAnimationFrame(this.#update);
-        });
+        requestAnimationFrame(Game.#update);
     }
 
     /**

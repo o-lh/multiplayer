@@ -70,6 +70,16 @@ export class Network {
     }
 
     /**
+     * @param {() => void} onConnection
+     */
+    static waitForConnection(onConnection) {
+        this.socket.on('connected', () => {
+            this.socket.removeAllListeners('connected');
+            onConnection();
+        });
+    }
+
+    /**
      * @param {string} message
      * @param {...any} params
      */
