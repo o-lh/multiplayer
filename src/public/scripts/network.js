@@ -70,23 +70,25 @@ export class Network {
     }
 
     /**
+     * @param {string} message
+     * @param {...any} params
+     */
+    static emit(message, ...params) {
+        this.socket.emit(message, ...params);
+    }
+
+    /**
      * @param {Entity} entity
      * @param {boolean} saveToServer
      */
     static createEntity(entity, saveToServer) {
+        // TODO: You don't actually need to stringify the object before emitting it
+        // TODO: Therefore this can also be done using Network.emit
         this.socket.emit(
             'create_entity',
             JSON.stringify(entity),
             saveToServer
         );
-    }
-
-    /**
-     * @param {string} id
-     * @param {Vector2} newPosition
-     */
-    static moveEntity(id, newPosition) {
-        this.socket.emit('move_entity', id, newPosition);
     }
 
     /**
