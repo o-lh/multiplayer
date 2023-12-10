@@ -13,12 +13,7 @@ export class Network {
 
     // TODO: Singleton
     static init() {
-        Network.socket.on('player_move', (id, position) => {
-            const index = Game.otherPlayers.findIndex(player => player.id === id);
-            Game.otherPlayers[index].position = position;
-        });
-
-        Network.socket.on('create_entity', serializedEntity => {
+        this.socket.on('create_entity', (serializedEntity) => {
             serializedEntity = JSON.parse(serializedEntity);
 
             const entity = Game.addEntity(serializedEntity.id, serializedEntity.owner);
@@ -52,25 +47,25 @@ export class Network {
             deserializeProperties(serializedEntity, entity);
         });
 
-        Network.socket.on('projectile_hit', (owner, projectileID, targetID) => {
+        this.socket.on('move_entity', (id, newPosition) => {
+            Game.getEntity(id).position = newPosition;
+        });
+
+        this.socket.on('destroy_entity', (id) => {
+            Game.getEntity(id).destroy();
+        });
+
+        this.socket.on('projectile_hit', (owner, projectileID, targetID) => {
             Game.entities[
                 Game.entities.findIndex(x => x.owner === owner && x.id === projectileID)
             ].destroy();
 
-            if (targetID === Network.socketID) {
+            if (targetID === this.socketID) {
                 ++Game.player.getComponent(Player).hitsTaken;
             } else {
                 const index = Game.otherPlayers.findIndex(player => player.id === targetID);
                 ++Game.otherPlayers[index].hitsTaken;
             }
-        });
-
-        // TODO: destroy_entity
-        Network.socket.on('player_disconnected', socketID => {
-            // TODO: Only remove the entity tagged as "Player"
-            // TODO: Game.destroyEntity
-            const index = Game.entities.findIndex(x => x.owner === socketID);
-            Game.entities.splice(index, 1);
         });
     }
 

@@ -36,6 +36,8 @@ export class Player extends Component {
         if (this.entity.position.x - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_WIDTH / 2)
             this.entity.position.x = -Game.CANVAS_WORLD_SPACE_WIDTH / 2 + Game.PLAYER_RADIUS;
 
+        Network.moveEntity(this.entity.id, this.entity.position);
+
         if (Input.mouseHeld(0)) {
             if (this.attackT <= 0) {
                 const clickPosition = Camera.screenSpacePointToWorldSpace(

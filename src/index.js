@@ -31,16 +31,20 @@ io.on('connection', (socket) => {
         socket.emit('create_entity', serializedEntity);
     }
 
-    // TODO
-    // socket.on('player_move', position => {
-    //     const index = players.findIndex(player => player.id === socket.id);
-    //     players[index].position = position;
-    //     socket.broadcast.emit('player_move', socket.id, position);
-    // });
-
     socket.on('create_entity', (entity, saveToServer) => {
-        if (saveToServer) serializedEntities.push(entity);
         socket.broadcast.emit('create_entity', entity);
+        if (saveToServer) serializedEntities.push(entity);
+    });
+
+    socket.on('move_entity', (id, newPosition) => {
+        socket.broadcast.emit('move_entity', id, newPosition);
+        const index = serializedEntities.findIndex(x => JSON.parse(x).id === id);
+        if (index !== -1) {
+            // TODO: Store entities properly on the server
+            const entity = JSON.parse(serializedEntities[index]);
+            entity.position = newPosition;
+            serializedEntities[index] = JSON.stringify(entity);
+        }
     });
 
     socket.on('projectile_hit', (owner, projectileID, targetID) => {
@@ -51,8 +55,8 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         // TODO: Only remove the entity tagged as "Player"
         const index = serializedEntities.findIndex(x => JSON.parse(x).owner === socket.id);
+        socket.broadcast.emit('destroy_entity', JSON.parse(serializedEntities[index]).id);
         serializedEntities.splice(index, 1);
-        socket.broadcast.emit('player_disconnected', socket.id);
     })
 })
 

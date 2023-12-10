@@ -41,8 +41,8 @@ export class Game {
     /**
      * @param {string} id
      */
-    static destroyEntity(id) {
-        Game.entities[this.entities.findIndex(x => x.id === id)].destroy();
+    static getEntity(id) {
+        return this.entities[this.entities.findIndex(x => x.id === id)];
     }
 
     static run() {
@@ -79,8 +79,6 @@ export class Game {
                 (Math.random() * this.CANVAS_WORLD_SPACE_HEIGHT) - this.CANVAS_WORLD_SPACE_HEIGHT / 2
             );
 
-            // Set the player's initial position on the server
-            Network.socket.emit('player_move', Game.player.position);
             Network.createEntity(Game.player, true);
 
             requestAnimationFrame(this.#update);
@@ -105,8 +103,6 @@ export class Game {
                 Game.entities.splice(i, 1);
             }
         }
-
-        Network.socket.emit('player_move', Game.player.position);
 
         Game.context.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
 
