@@ -79,7 +79,7 @@ export class Player extends Component {
         Game.context.arc(
             playerPos.x,
             playerPos.y,
-            Game.playerRadiusScreenSpace,
+            Camera.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS),
             0,
             2 * Math.PI,
             false
@@ -91,7 +91,7 @@ export class Player extends Component {
         Game.context.fillText(
             this.hitsTaken,
             playerPos.x,
-            playerPos.y - Game.playerRadiusScreenSpace - 5
+            playerPos.y - Camera.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS) - 5
         );
     }
 }

@@ -14,12 +14,7 @@ export class Game {
     /** @type {HTMLCanvasElement} */
     static canvas = document.getElementById('canvas');
     static context = Game.canvas.getContext('2d');
-    static smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
     static PLAYER_RADIUS = 0.25;
-    /** @type {number} */
-    static playerRadiusScreenSpace;
-    /** @type {Entity} */
-    static player;
     // TODO: End the mess zone
 
     /** @type {() => void} */
@@ -46,25 +41,17 @@ export class Game {
     }
 
     static run() {
-        Game.canvas.width = Game.smallerDimension;
-        Game.canvas.height = Game.smallerDimension;
-
         Game.context.font = '20px sans-serif';
         Game.context.textAlign = 'center';
-
-        Game.playerRadiusScreenSpace = Camera.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS);
 
         addEventListener('contextmenu', event => event.preventDefault());
 
         addEventListener('resize', _ => {
-            Game.smallerDimension = innerWidth > innerHeight ? innerHeight : innerWidth;
-            Game.canvas.width = Game.smallerDimension;
-            Game.canvas.height = Game.smallerDimension;
+            Game.canvas.width = innerWidth > innerHeight ? innerHeight : innerWidth;
+            Game.canvas.height = innerWidth > innerHeight ? innerHeight : innerWidth;
 
             Game.context.font = '20px sans-serif';
             Game.context.textAlign = 'center';
-
-            Game.playerRadiusScreenSpace = Camera.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS);
         });
 
         this.#updateInput = Input.init();
@@ -73,14 +60,14 @@ export class Game {
     }
 
     static #start() {
-        Game.player = Game.addEntity();
-        Game.player.addComponent(Player).init();
-        Game.player.position = new Vector2(
+        const player = Game.addEntity();
+        player.addComponent(Player).init();
+        player.position = new Vector2(
             (Math.random() * Game.CANVAS_WORLD_SPACE_WIDTH) - Game.CANVAS_WORLD_SPACE_WIDTH / 2,
             (Math.random() * Game.CANVAS_WORLD_SPACE_HEIGHT) - Game.CANVAS_WORLD_SPACE_HEIGHT / 2
         );
 
-        Network.createEntity(Game.player, true);
+        Network.createEntity(player, true);
 
         requestAnimationFrame(Game.#update);
     }
