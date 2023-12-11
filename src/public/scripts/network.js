@@ -54,17 +54,9 @@ export class Network {
             Game.getEntity(id).destroy();
         });
 
-        this.#socket.on('projectile_hit', (owner, projectileID, targetID) => {
-            Game.entities[
-                Game.entities.findIndex(x => x.owner === owner && x.id === projectileID)
-            ].destroy();
-
-            if (targetID === this.socketID) {
-                ++Game.player.getComponent(Player).hitsTaken;
-            } else {
-                const index = Game.otherPlayers.findIndex(player => player.id === targetID);
-                ++Game.otherPlayers[index].hitsTaken;
-            }
+        this.#socket.on('projectile_hit', (projectileID, targetID) => {
+            Game.getEntity(projectileID).destroy();
+            ++Game.getEntity(targetID).getComponent(Player).hitsTaken;
         });
     }
 

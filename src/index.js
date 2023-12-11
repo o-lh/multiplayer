@@ -48,9 +48,9 @@ io.on('connection', (socket) => {
         serializedEntities[index] = JSON.stringify(entity);
     });
 
-    socket.on('projectile_hit', (owner, projectileID, targetID) => {
+    socket.on('projectile_hit', (projectileID, targetID) => {
+        socket.broadcast.emit('projectile_hit', projectileID, targetID);
         // TODO: Modify entity on the server as well
-        socket.broadcast.emit('projectile_hit', owner, projectileID, targetID);
     });
 
     socket.on('disconnect', () => {

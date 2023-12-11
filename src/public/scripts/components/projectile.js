@@ -3,23 +3,21 @@ import { Component } from "../component.js";
 import { Game } from "../game.js";
 import { Network } from "../network.js";
 import { Physics } from "../physics.js";
+import { Player } from "./player.js";
 import { Time } from '../time.js';
 import { Vector2 } from "../vector2.js";
 
 export class Projectile extends Component {
     /**
-     * @param {string} owner
      * @param {Vector2} origin
      * @param {Vector2} direction
-     * @param {number} speed
      */
-    init(owner, origin, direction, speed) {
-        this.owner = owner;
+    init(origin, direction) {
         this.origin = origin;
         this.direction = direction;
-        this.speed = speed;
         this.head = origin;
         this.tail = origin;
+        this.speed = 50;
     }
 
     update() {
@@ -41,26 +39,25 @@ export class Projectile extends Component {
 
         if (this.#isTailPastOrigin()) this.tail = this.origin;
 
-        // TODO
-        // if (this.owner === Network.socketID) {
-        //     for (const player of Game.otherPlayers) {
-        //         if (Physics.lineCircleCollision(
-        //             this.tail,
-        //             this.head,
-        //             player.position,
-        //             Game.PLAYER_RADIUS
-        //         )) {
-        //             Network.socket.emit(
-        //                 'projectile_hit',
-        //                 Network.socketID,
-        //                 this.entity.id,
-        //                 player.id
-        //             );
-        //             this.entity.destroy();
-        //             ++player.hitsTaken;
-        //         }
-        //     }
-        // }
+        if (!Network.owns(this.entity)) return;
+
+        for (const entity of Game.entities) {
+            // TODO: Entity tags
+            if (!entity.getComponent(Player)) continue;
+
+            if (Network.owns(entity)) continue;
+
+            if (!Physics.lineCircleCollision(
+                this.tail,
+                this.head,
+                entity.position,
+                Game.PLAYER_RADIUS
+            )) continue;
+
+            Network.emit('projectile_hit', this.entity.id, entity.id);
+            this.entity.destroy();
+            ++entity.getComponent(Player).hitsTaken;
+        }
     }
 
     render() {

@@ -52,13 +52,11 @@ export class Player extends Component {
                 const entity = Game.addEntity();
 
                 entity.addComponent(Projectile).init(
-                    Network.socketID,
                     Vector2.add(
                         structuredClone(this.entity.position),
                         Vector2.multiplyScalar(direction, Game.PLAYER_RADIUS)
                     ),
-                    direction,
-                    50
+                    direction
                 );
 
                 Network.createEntity(entity, false);
