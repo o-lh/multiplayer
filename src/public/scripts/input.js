@@ -16,6 +16,8 @@ export class Input {
     static #mousePosition = new Vector2();
 
     static init() {
+        addEventListener('contextmenu', (event) => event.preventDefault());
+
         addEventListener('keydown', event => {
             if (event.repeat) return;
 

@@ -50,7 +50,6 @@ export class Game {
     static run() {
         this.setCanvasProperties();
 
-        addEventListener('contextmenu', (event) => event.preventDefault());
         addEventListener('resize', (_) => this.setCanvasProperties());
 
         this.#updateInput = Input.init();
