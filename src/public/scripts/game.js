@@ -15,6 +15,13 @@ export class Game {
     static canvas = document.getElementById('canvas');
     static context = Game.canvas.getContext('2d');
     static PLAYER_RADIUS = 0.25;
+
+    static setCanvasProperties() {
+        this.canvas.width = innerWidth > innerHeight ? innerHeight : innerWidth;
+        this.canvas.height = innerWidth > innerHeight ? innerHeight : innerWidth;
+        this.context.font = '20px sans-serif';
+        this.context.textAlign = 'center';
+    }
     // TODO: End the mess zone
 
     /** @type {() => void} */
@@ -41,18 +48,10 @@ export class Game {
     }
 
     static run() {
-        Game.context.font = '20px sans-serif';
-        Game.context.textAlign = 'center';
+        this.setCanvasProperties();
 
-        addEventListener('contextmenu', event => event.preventDefault());
-
-        addEventListener('resize', _ => {
-            Game.canvas.width = innerWidth > innerHeight ? innerHeight : innerWidth;
-            Game.canvas.height = innerWidth > innerHeight ? innerHeight : innerWidth;
-
-            Game.context.font = '20px sans-serif';
-            Game.context.textAlign = 'center';
-        });
+        addEventListener('contextmenu', (event) => event.preventDefault());
+        addEventListener('resize', (_) => this.setCanvasProperties());
 
         this.#updateInput = Input.init();
         Network.init();
