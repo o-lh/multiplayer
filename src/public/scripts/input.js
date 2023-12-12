@@ -1,3 +1,4 @@
+import { Renderer } from "./renderer.js";
 import { Vector2 } from "./vector2.js";
 
 export class Input {
@@ -99,7 +100,7 @@ export class Input {
         return this.#mouseReleased.includes(mouseButton);
     }
 
-    static get mousePosition() {
-        return this.#mousePosition;
+    static get mousePositionWorldSpace() {
+        return Renderer.screenSpacePointToWorldSpace(this.#mousePosition);
     }
 }

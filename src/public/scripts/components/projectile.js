@@ -1,9 +1,9 @@
-import { Camera } from "../camera.js";
 import { Component } from "../component.js";
 import { Game } from "../game.js";
 import { Network } from "../network.js";
 import { Physics } from "../physics.js";
 import { Player } from "./player.js";
+import { Renderer } from "../renderer.js";
 import { Time } from '../time.js';
 import { Vector2 } from "../vector2.js";
 
@@ -51,7 +51,7 @@ export class Projectile extends Component {
                 this.tail,
                 this.head,
                 entity.position,
-                Game.PLAYER_RADIUS
+                entity.getComponent(Player).size
             )) continue;
 
             Network.emit('projectile_hit', this.entity.id, entity.id);
@@ -61,15 +61,7 @@ export class Projectile extends Component {
     }
 
     render() {
-        const lineStart = Camera.worldSpacePointToScreenSpace(this.tail);
-        const lineEnd = Camera.worldSpacePointToScreenSpace(this.head);
-
-        Game.context.beginPath();
-        Game.context.strokeStyle = 'rgb(255, 255, 255)';
-        Game.context.lineWidth = 2;
-        Game.context.moveTo(lineStart.x, lineStart.y);
-        Game.context.lineTo(lineEnd.x, lineEnd.y);
-        Game.context.stroke();
+        Renderer.renderLine('rgb(255, 255, 255)', this.tail, this.head);
     }
 
     #isTailPastOrigin() {

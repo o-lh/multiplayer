@@ -1,14 +1,15 @@
-import { Camera } from "../camera.js";
 import { Component } from "../component.js";
 import { Game } from "../game.js";
 import { Input } from "../input.js";
 import { Network } from "../network.js";
 import { Projectile } from "./projectile.js";
+import { Renderer } from "../renderer.js";
 import { Time } from "../time.js";
 import { Vector2 } from "../vector2.js";
 
 export class Player extends Component {
     init() {
+        this.size = 0.25;
         this.speed = 4;
         this.attackInterval = 0.2;
         this.attackT = 0;
@@ -27,25 +28,20 @@ export class Player extends Component {
         if (Input.keyHeld('KeyA') || Input.keyHeld('ArrowLeft'))
             this.entity.position.x -= this.speed * Time.deltaTime;
 
-        if (this.entity.position.y - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
-            this.entity.position.y = -Game.CANVAS_WORLD_SPACE_HEIGHT / 2 + Game.PLAYER_RADIUS;
-        if (this.entity.position.x + Game.PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_WIDTH / 2)
-            this.entity.position.x = Game.CANVAS_WORLD_SPACE_WIDTH / 2 - Game.PLAYER_RADIUS;
-        if (this.entity.position.y + Game.PLAYER_RADIUS > Game.CANVAS_WORLD_SPACE_HEIGHT / 2)
-            this.entity.position.y = Game.CANVAS_WORLD_SPACE_HEIGHT / 2 - Game.PLAYER_RADIUS;
-        if (this.entity.position.x - Game.PLAYER_RADIUS < -Game.CANVAS_WORLD_SPACE_WIDTH / 2)
-            this.entity.position.x = -Game.CANVAS_WORLD_SPACE_WIDTH / 2 + Game.PLAYER_RADIUS;
+        if (this.entity.position.y - this.size < -Game.SCENE_SIZE.y / 2)
+            this.entity.position.y = -Game.SCENE_SIZE.y / 2 + this.size;
+        if (this.entity.position.x + this.size > Game.SCENE_SIZE.x / 2)
+            this.entity.position.x = Game.SCENE_SIZE.x / 2 - this.size;
+        if (this.entity.position.y + this.size > Game.SCENE_SIZE.y / 2)
+            this.entity.position.y = Game.SCENE_SIZE.y / 2 - this.size;
+        if (this.entity.position.x - this.size < -Game.SCENE_SIZE.x / 2)
+            this.entity.position.x = -Game.SCENE_SIZE.x / 2 + this.size;
 
         Network.emit('move_entity', this.entity.id, this.entity.position);
 
         if (Input.mouseHeld(0)) {
             if (this.attackT <= 0) {
-                const clickPosition = Camera.screenSpacePointToWorldSpace(
-                    new Vector2(
-                        Input.mousePosition.x - Game.canvas.offsetLeft,
-                        Input.mousePosition.y - Game.canvas.offsetTop
-                    )
-                );
+                const clickPosition = Input.mousePositionWorldSpace;
 
                 const direction = Vector2.subtract(clickPosition, this.entity.position).normalized;
 
@@ -54,7 +50,7 @@ export class Player extends Component {
                 entity.addComponent(Projectile).init(
                     Vector2.add(
                         structuredClone(this.entity.position),
-                        Vector2.multiplyScalar(direction, Game.PLAYER_RADIUS)
+                        Vector2.multiplyScalar(direction, this.size)
                     ),
                     direction
                 );
@@ -73,25 +69,11 @@ export class Player extends Component {
         // TODO: No need to calculate this every frame
         const colour = Network.owns(this.entity) ? 'rgb(0, 255, 0)' : 'rgb(255, 0, 0)';
 
-        const playerPos = Camera.worldSpacePointToScreenSpace(this.entity.position);
-
-        Game.context.beginPath();
-        Game.context.arc(
-            playerPos.x,
-            playerPos.y,
-            Camera.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS),
-            0,
-            2 * Math.PI,
-            false
-        );
-        Game.context.fillStyle = colour;
-        Game.context.fill();
-
-        Game.context.fillStyle = colour;
-        Game.context.fillText(
+        Renderer.renderCircle(colour, this.entity.position, this.size);
+        Renderer.renderText(
+            colour,
             this.hitsTaken,
-            playerPos.x,
-            playerPos.y - Camera.worldSpaceLengthToScreenSpace(Game.PLAYER_RADIUS) - 5
+            new Vector2(this.entity.position.x, this.entity.position.y - this.size - 0.1)
         );
     }
 }
