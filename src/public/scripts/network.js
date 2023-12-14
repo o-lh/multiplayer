@@ -7,43 +7,15 @@ import { Vector2 } from "./vector2.js";
 export class Network {
     static #socket = io();
 
-    // TODO: Separate into #componentConstructors and #objectConstructors
-    static #constructors = { Vector2: Vector2, Projectile: Projectile, Player: Player };
+    static #componentConstructors = { Projectile: Projectile, Player: Player };
+    static #objectConstructors = { Vector2: Vector2 };
 
     // TODO: Singleton
     static init() {
         this.#socket.on('create_entity', (serializedEntity) => {
             serializedEntity = JSON.parse(serializedEntity);
-
             const entity = Game.addEntity(serializedEntity.id, serializedEntity.owner);
-
-            // TODO: Move this outside of this function (entity needs to be in scope)
-            function deserializeProperties(serializedObject, deserializedObject) {
-                for (const property in serializedObject) {
-                    if (typeof serializedObject[property] === 'object') {
-                        if (Array.isArray(serializedObject[property])) {
-                            deserializedObject[property] = [];
-                        } else {
-                            deserializedObject[property] =
-                                new Network.#constructors[serializedObject[property].constructorName]();
-
-                            // TODO: This will need to be changed if any other non-component classes are added
-                            if (deserializedObject[property].constructorName !== 'Vector2') {
-                                deserializedObject[property].entity = entity;
-                            }
-                        }
-
-                        deserializeProperties(
-                            serializedObject[property],
-                            deserializedObject[property]
-                        );
-                    } else {
-                        deserializedObject[property] = serializedObject[property];
-                    }
-                }
-            }
-
-            deserializeProperties(serializedEntity, entity);
+            this.#deserializeProperties(entity, serializedEntity, entity);
         });
 
         this.#socket.on('move_entity', (id, newPosition) => {
@@ -105,5 +77,36 @@ export class Network {
      */
     static get socketID() {
         return this.#socket.id;
+    }
+
+    static #deserializeProperties(entity, serializedObject, deserializedObject) {
+        for (const property in serializedObject) {
+            if (typeof serializedObject[property] !== 'object') {
+                deserializedObject[property] = serializedObject[property];
+                continue;
+            }
+
+            if (Array.isArray(serializedObject[property])) {
+                deserializedObject[property] = [];
+            } else if (Object.hasOwn(
+                this.#objectConstructors,
+                serializedObject[property].constructorName
+            )) {
+                deserializedObject[property] = new this.#objectConstructors[
+                    serializedObject[property].constructorName
+                ]();
+            } else {
+                deserializedObject[property] = new this.#componentConstructors[
+                    serializedObject[property].constructorName
+                ]();
+                deserializedObject[property].entity = entity;
+            }
+
+            this.#deserializeProperties(
+                entity,
+                serializedObject[property],
+                deserializedObject[property]
+            );
+        }
     }
 }
