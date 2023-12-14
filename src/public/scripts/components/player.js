@@ -55,7 +55,7 @@ export class Player extends Component {
                     direction
                 );
 
-                Network.createEntity(entity, false);
+                Network.emit('create_entity', entity, false);
 
                 this.attackT += this.attackInterval;
             }

@@ -13,7 +13,6 @@ export class Network {
     // TODO: Singleton
     static init() {
         this.#socket.on('create_entity', (serializedEntity) => {
-            serializedEntity = JSON.parse(serializedEntity);
             const entity = Game.addEntity(serializedEntity.id, serializedEntity.owner);
             this.#deserializeProperties(entity, serializedEntity, entity);
         });
@@ -48,20 +47,6 @@ export class Network {
      */
     static emit(message, ...params) {
         this.#socket.emit(message, ...params);
-    }
-
-    /**
-     * @param {Entity} entity
-     * @param {boolean} saveToServer
-     */
-    static createEntity(entity, saveToServer) {
-        // TODO: You don't actually need to stringify the object before emitting it
-        // TODO: Therefore this can also be done using Network.emit
-        this.#socket.emit(
-            'create_entity',
-            JSON.stringify(entity),
-            saveToServer
-        );
     }
 
     /**

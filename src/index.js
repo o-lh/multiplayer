@@ -21,7 +21,7 @@ app.use(express.static(join(__dirname, 'public')));
 // - https://socket.io/how-to/deal-with-cookies
 
 // TODO: /shared or /common or /engine folder?
-/** @type {string[]} */
+/** @type {any[]} */
 const serializedEntities = [];
 
 io.on('connection', (socket) => {
@@ -38,14 +38,14 @@ io.on('connection', (socket) => {
 
     socket.on('move_entity', (id, newPosition) => {
         socket.broadcast.emit('move_entity', id, newPosition);
-        const index = serializedEntities.findIndex(x => JSON.parse(x).id === id);
+        const index = serializedEntities.findIndex(x => x.id === id);
 
         if (index === -1) return;
 
         // TODO: Store entities properly on the server
-        const entity = JSON.parse(serializedEntities[index]);
+        const entity = serializedEntities[index];
         entity.position = newPosition;
-        serializedEntities[index] = JSON.stringify(entity);
+        serializedEntities[index] = entity;
     });
 
     socket.on('projectile_hit', (projectileID, targetID) => {
@@ -55,11 +55,11 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         // TODO: Only remove the entity tagged as "Player"
-        const index = serializedEntities.findIndex(x => JSON.parse(x).owner === socket.id);
+        const index = serializedEntities.findIndex(x => x.owner === socket.id);
 
         if (index === -1) return;
 
-        socket.broadcast.emit('destroy_entity', JSON.parse(serializedEntities[index]).id);
+        socket.broadcast.emit('destroy_entity', serializedEntities[index].id);
         serializedEntities.splice(index, 1);
     })
 })

@@ -47,7 +47,7 @@ export class Game {
             (Math.random() * Game.SCENE_SIZE.y) - Game.SCENE_SIZE.y / 2
         );
 
-        Network.createEntity(player, true);
+        Network.emit('create_entity', player, true);
 
         requestAnimationFrame(Game.#update);
     }
