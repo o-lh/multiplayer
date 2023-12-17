@@ -14,7 +14,7 @@ export class Game {
     static entities = [];
 
     /** @type {() => void} */
-    static #updateInput;
+    static #clearInput;
 
     /**
      * @param {string} [id]
@@ -33,7 +33,7 @@ export class Game {
     }
 
     static run() {
-        this.#updateInput = Input.init();
+        this.#clearInput = Input.init();
         Renderer.init();
         Network.init();
         Network.waitForConnection(this.#start);
@@ -57,7 +57,6 @@ export class Game {
      */
     static #update(time) {
         Time.tick(time);
-        Game.#updateInput();
 
         for (const entity of Game.entities) {
             for (const component of entity.components) {
@@ -72,6 +71,8 @@ export class Game {
         }
 
         Renderer.renderScene(Game.entities);
+
+        Game.#clearInput();
 
         // TODO: Untie game logic from frame rate
         requestAnimationFrame(Game.#update);
