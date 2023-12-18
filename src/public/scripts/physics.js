@@ -27,4 +27,32 @@ export class Physics {
         const closestPoint = Vector2.add(lineStart, Vector2.multiplyScalar(line, t));
         return this.pointCircleCollision(closestPoint, circleCenter, circleRadius);
     }
+
+    /**
+     * @param {Vector2} lineAStart
+     * @param {Vector2} lineAEnd
+     * @param {Vector2} lineBStart
+     * @param {Vector2} lineBEnd
+     */
+    static lineLineIntersection(lineAStart, lineAEnd, lineBStart, lineBEnd) {
+        const t = ((lineAStart.x - lineBStart.x) * (lineBStart.y - lineBEnd.y) -
+            (lineAStart.y - lineBStart.y) * (lineBStart.x - lineBEnd.x)) /
+            ((lineAStart.x - lineAEnd.x) * (lineBStart.y - lineBEnd.y) -
+            (lineAStart.y - lineAEnd.y) * (lineBStart.x - lineBEnd.x))
+
+        const u = ((lineAStart.x - lineBStart.x) * (lineAStart.y - lineAEnd.y) -
+            (lineAStart.y - lineBStart.y) * (lineAStart.x - lineAEnd.x)) /
+            ((lineAStart.x - lineAEnd.x) * (lineBStart.y - lineBEnd.y) -
+            (lineAStart.y - lineAEnd.y) * (lineBStart.x - lineBEnd.x))
+
+        let intersection = null;
+
+        if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
+            intersection = new Vector2(
+                lineAStart.x + t * (lineAEnd.x - lineAStart.x),
+                lineAStart.y + t * (lineAEnd.y - lineAStart.y)
+            );
+        
+        return { intersection: intersection, t: t, u: u };
+    }
 }
