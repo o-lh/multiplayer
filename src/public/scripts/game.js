@@ -5,6 +5,7 @@ import { Player } from './components/player.js';
 import { Renderer } from './renderer.js';
 import { Time } from './time.js';
 import { Vector2 } from "./vector2.js";
+import { WallCreator } from './components/wall-creator.js';
 
 export class Game {
     // TODO: Scene class
@@ -49,6 +50,8 @@ export class Game {
 
         Network.emit('create_entity', player, true);
 
+        Game.addEntity().addComponent(WallCreator).init();
+
         requestAnimationFrame(Game.#update);
     }
 
@@ -56,6 +59,8 @@ export class Game {
      * @param {DOMHighResTimeStamp} time
      */
     static #update(time) {
+        // TODO: Game.#updateTime(time);
+        // TODO: google javascript singleton (does it just need an #initialised property?)
         Time.tick(time);
 
         for (const entity of Game.entities) {
