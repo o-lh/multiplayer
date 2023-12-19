@@ -50,6 +50,7 @@ export class Entity {
     addComponent(component) {
         const addedComponent = this.components[this.components.push(new component(this)) - 1];
         addedComponent.constructorName = addedComponent.constructor.name;
+        addedComponent.start();
         return addedComponent;
     }
 

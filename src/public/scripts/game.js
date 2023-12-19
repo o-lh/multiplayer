@@ -47,13 +47,11 @@ export class Game {
             (Math.random() * Game.SCENE_SIZE.x) - Game.SCENE_SIZE.x / 2,
             (Math.random() * Game.SCENE_SIZE.y) - Game.SCENE_SIZE.y / 2
         );
-        player.addComponent(Player).init();
+        player.addComponent(Player);
 
         Network.emit('create_entity', player, true);
 
-        Game.addEntity().addComponent(WallCreator).init();
-
-        // TODO: Component.start methods called here instead of init on each component
+        Game.addEntity().addComponent(WallCreator);
 
         requestAnimationFrame(Game.#update);
     }

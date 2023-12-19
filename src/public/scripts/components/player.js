@@ -8,7 +8,7 @@ import { Time } from "../time.js";
 import { Vector2 } from "../vector2.js";
 
 export class Player extends Component {
-    init() {
+    start() {
         this.size = 0.25;
         this.speed = 4;
         this.attackInterval = 0.2;

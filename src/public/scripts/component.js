@@ -11,6 +11,8 @@ export class Component {
         this.#entity = entity;
     }
 
+    start() {}
+
     update() {}
 
     render() {}

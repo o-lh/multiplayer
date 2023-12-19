@@ -3,7 +3,7 @@ import { Input } from "../input.js";
 import { Renderer } from "../renderer.js";
 
 export class WallCreator extends Component {
-    init() {
+    start() {
         this.startPoint = null;
         this.endPoint = null;
     }
