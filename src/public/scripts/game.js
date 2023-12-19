@@ -11,6 +11,9 @@ export class Game {
     // TODO: Scene class
     static SCENE_SIZE = new Vector2(20, 20);
 
+    // TODO: What to do with this array? Put it on a component? Eh
+    static walls = [];
+
     /** @type {Entity[]} */
     static entities = [];
 

@@ -1,21 +1,34 @@
 import { Component } from "../component.js";
+import { Game } from "../game.js";
 import { Input } from "../input.js";
 import { Renderer } from "../renderer.js";
 
 export class WallCreator extends Component {
-    start() {
-        this.startPoint = null;
-        this.endPoint = null;
-    }
+    startPoint = null;
+    endPoint = null;
 
     update() {
-        if (Input.keyPressed('Digit1')) this.startPoint = Input.mousePositionWorldSpace;
-        if (Input.keyPressed('Digit2')) this.endPoint = Input.mousePositionWorldSpace;
+        let created = false;
+
+        if (Input.keyPressed('Digit1')) {
+            this.startPoint = Input.mousePositionWorldSpace;
+            if (this.endPoint) created = true;
+        }
+
+        if (Input.keyPressed('Digit2')) {
+            this.endPoint = Input.mousePositionWorldSpace;
+            if (this.startPoint) created = true;
+        }
+
+        if (created) {
+            Game.walls = [];
+            Game.walls.push({ startPoint: this.startPoint, endPoint: this.endPoint });
+        }
     }
 
     render() {
-        if (this.startPoint && this.endPoint) {
-            Renderer.renderLine('rgb(255, 255, 255)', this.startPoint, this.endPoint);
+        for (const wall of Game.walls) {
+            Renderer.renderLine('rgb(255, 255, 255)', wall.startPoint, wall.endPoint);
         }
     }
 }

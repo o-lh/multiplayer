@@ -15,16 +15,27 @@ export class Projectile extends Component {
     init(origin, direction) {
         this.origin = origin;
         this.direction = direction;
-        this.head = origin;
+        this.entity.position = origin;
         this.tail = origin;
         this.speed = 50;
     }
 
     update() {
-        this.head = Vector2.add(
-            this.head,
+        this.entity.position = Vector2.add(
+            this.entity.position,
             Vector2.multiplyScalar(this.direction, this.speed * Time.deltaTime)
         );
+
+        // TODO: Spatial partitioning
+        for (const wall of Game.walls) {
+            if (Physics.lineLineIntersection(
+                this.tail,
+                this.entity.position,
+                wall.startPoint,
+                wall.endPoint
+            ).intersection)
+                this.entity.destroy();
+        }
 
         // TODO: These boundaries are hard-coded
         if (this.tail.y < -10 || this.tail.x > 10 || this.tail.y > 10 || this.tail.x < -10) {
@@ -33,7 +44,7 @@ export class Projectile extends Component {
         }
 
         this.tail = Vector2.subtract(
-            this.head,
+            this.entity.position,
             Vector2.multiplyScalar(this.direction, 2)
         );
 
@@ -49,7 +60,7 @@ export class Projectile extends Component {
 
             if (!Physics.lineCircleCollision(
                 this.tail,
-                this.head,
+                this.entity.position,
                 entity.position,
                 entity.getComponent(Player).size
             )) continue;
@@ -61,12 +72,12 @@ export class Projectile extends Component {
     }
 
     render() {
-        Renderer.renderLine('rgb(255, 255, 255)', this.tail, this.head);
+        Renderer.renderLine('rgb(255, 255, 255)', this.tail, this.entity.position);
     }
 
     #isTailPastOrigin() {
-        const sqrToTail = Vector2.subtract(this.head, this.tail).sqrMagnitude;
-        const sqrToOrigin = Vector2.subtract(this.head, this.origin).sqrMagnitude;
+        const sqrToTail = Vector2.subtract(this.entity.position, this.tail).sqrMagnitude;
+        const sqrToOrigin = Vector2.subtract(this.entity.position, this.origin).sqrMagnitude;
         return sqrToTail > sqrToOrigin;
     }
 }
