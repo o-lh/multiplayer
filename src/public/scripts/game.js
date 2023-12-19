@@ -42,15 +42,18 @@ export class Game {
 
     static #start() {
         const player = Game.addEntity();
-        player.addComponent(Player).init();
+        player.addTag('Player');
         player.position = new Vector2(
             (Math.random() * Game.SCENE_SIZE.x) - Game.SCENE_SIZE.x / 2,
             (Math.random() * Game.SCENE_SIZE.y) - Game.SCENE_SIZE.y / 2
         );
+        player.addComponent(Player).init();
 
         Network.emit('create_entity', player, true);
 
         Game.addEntity().addComponent(WallCreator).init();
+
+        // TODO: Component.start methods called here instead of init on each component
 
         requestAnimationFrame(Game.#update);
     }
