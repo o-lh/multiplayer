@@ -1,10 +1,26 @@
 export class Vector2 {
+    constructorName = 'Vector2';
+    x;
+    y;
+
+    get magnitude() {
+        return Math.sqrt(this.sqrMagnitude);
+    }
+
+    get normalized() {
+        const magnitude = this.magnitude;
+        return new Vector2(this.x / magnitude, this.y / magnitude);
+    }
+
+    get sqrMagnitude() {
+        return this.x ** 2 + this.y ** 2;
+    }
+
     /**
      * @param {number} x
      * @param {number} y
      */
     constructor(x = 0, y = 0) {
-        this.constructorName = 'Vector2'
         this.x = x;
         this.y = y;
     }
@@ -58,18 +74,5 @@ export class Vector2 {
         });
 
         return allEqual;
-    }
-
-    get magnitude() {
-        return Math.sqrt(this.sqrMagnitude);
-    }
-
-    get normalized() {
-        const magnitude = this.magnitude;
-        return new Vector2(this.x / magnitude, this.y / magnitude);
-    }
-
-    get sqrMagnitude() {
-        return this.x ** 2 + this.y ** 2;
     }
 }

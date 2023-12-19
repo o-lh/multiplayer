@@ -18,11 +18,11 @@ export class Game {
     static #clearInput;
 
     /**
-     * @param {string} [id]
-     * @param {string} [owner]
+     * @param {string} id
+     * @param {string} owner
      * @returns {Entity}
      */
-    static addEntity(id, owner) {
+    static addEntity(id = null, owner = null) {
         return this.entities[this.entities.push(new Entity(id, owner)) - 1];
     }
 

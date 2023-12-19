@@ -10,6 +10,13 @@ export class Network {
     static #componentConstructors = { Projectile: Projectile, Player: Player };
     static #objectConstructors = { Vector2: Vector2 };
 
+    /**
+     * @returns {string}
+     */
+    static get socketID() {
+        return this.#socket.id;
+    }
+
     // TODO: Singleton
     static init() {
         this.#socket.on('create_entity', (serializedEntity) => {
@@ -55,13 +62,6 @@ export class Network {
      */
     static owns(entity) {
         return entity.owner === this.socketID;
-    }
-
-    /**
-     * @returns {string}
-     */
-    static get socketID() {
-        return this.#socket.id;
     }
 
     static #deserializeProperties(entity, serializedObject, deserializedObject) {

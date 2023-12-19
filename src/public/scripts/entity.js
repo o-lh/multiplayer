@@ -14,11 +14,15 @@ export class Entity {
     components = [];
     #destroyed = false;
 
+    get destroyed() {
+        return this.#destroyed;
+    }
+
     /**
-     * @param {string} [id]
-     * @param {string} [owner]
+     * @param {string} id
+     * @param {string} owner
      */
-    constructor(id, owner) {
+    constructor(id = null, owner = null) {
         this.id = id ? id : `${Network.socketID}-${Entity.nextID++}`;
         this.owner = owner ? owner : Network.socketID;
     }
@@ -60,9 +64,5 @@ export class Entity {
      */
     getComponent(component) {
         return this.components.find(x => x instanceof component);
-    }
-
-    get destroyed() {
-        return this.#destroyed;
     }
 }

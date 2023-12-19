@@ -16,6 +16,10 @@ export class Input {
     static #mouseReleased = [];
     static #mousePosition = new Vector2();
 
+    static get mousePositionWorldSpace() {
+        return Renderer.screenSpacePointToWorldSpace(this.#mousePosition);
+    }
+
     static init() {
         addEventListener('contextmenu', (event) => event.preventDefault());
 
@@ -98,9 +102,5 @@ export class Input {
      */
     static mouseReleased(mouseButton) {
         return this.#mouseReleased.includes(mouseButton);
-    }
-
-    static get mousePositionWorldSpace() {
-        return Renderer.screenSpacePointToWorldSpace(this.#mousePosition);
     }
 }
