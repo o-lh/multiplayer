@@ -35,6 +35,7 @@ export class Physics {
      * @param {Vector2} lineBEnd
      */
     static lineLineIntersection(lineAStart, lineAEnd, lineBStart, lineBEnd) {
+        // TODO: When the two lines are parallel or coincident, the denominator is zero
         const t = ((lineAStart.x - lineBStart.x) * (lineBStart.y - lineBEnd.y) -
             (lineAStart.y - lineBStart.y) * (lineBStart.x - lineBEnd.x)) /
             ((lineAStart.x - lineAEnd.x) * (lineBStart.y - lineBEnd.y) -
