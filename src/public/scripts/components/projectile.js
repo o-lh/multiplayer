@@ -14,10 +14,12 @@ export class Projectile extends Component {
      */
     init(origin, direction) {
         this.origin = origin;
-        this.direction = direction;
         this.entity.position = origin;
+        this.direction = direction;
         this.tail = origin;
+        this.tailDirection = direction;
         this.speed = 50;
+        this.collided = false;
     }
 
     update() {
@@ -28,13 +30,20 @@ export class Projectile extends Component {
 
         // TODO: Spatial partitioning
         for (const wall of Game.walls) {
-            if (Physics.lineLineIntersection(
+            // TODO: Projectile's hitbox is just its movement this frame, not all of the tail
+            const intersection = Physics.lineLineIntersection(
                 this.tail,
                 this.entity.position,
                 wall.startPoint,
                 wall.endPoint
-            ).intersection)
+            );
+
+            if (intersection.intersection) {
                 this.entity.destroy();
+                // TODO
+                // this.collided = true;
+                // this.entity.position = intersection.intersection;
+            }
         }
 
         // TODO: These boundaries are hard-coded
