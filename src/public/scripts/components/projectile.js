@@ -23,10 +23,7 @@ export class Projectile extends Component {
     }
 
     update() {
-        this.entity.position = Vector2.add(
-            this.entity.position,
-            Vector2.multiplyScalar(this.direction, this.speed * Time.deltaTime)
-        );
+        this.entity.position = this.#movePointInDirection(this.entity.position, this.direction);
 
         // TODO: Spatial partitioning
         for (const wall of Game.walls) {
@@ -39,11 +36,19 @@ export class Projectile extends Component {
             );
 
             if (intersection.intersection) {
-                this.entity.destroy();
-                // TODO
-                // this.collided = true;
-                // this.entity.position = intersection.intersection;
+                this.collided = true;
+                this.entity.position = intersection.intersection;
             }
+        }
+
+        if (this.collided) {
+            this.#movePointInDirection(this.tail, this.tailDirection);
+            // TODO: Use dot product to get direction from entity.position
+            let t = Vector2.dot(
+                this.tailDirection,
+                Vector2.subtract(this.entity.position, this.tail)
+            );
+            console.log(t);
         }
 
         // TODO: These boundaries are hard-coded
@@ -88,5 +93,16 @@ export class Projectile extends Component {
         const sqrToTail = Vector2.subtract(this.entity.position, this.tail).sqrMagnitude;
         const sqrToOrigin = Vector2.subtract(this.entity.position, this.origin).sqrMagnitude;
         return sqrToTail > sqrToOrigin;
+    }
+
+    /**
+     * @param {Vector2} point
+     * @param {Vector2} direction
+     */
+    #movePointInDirection(point, direction) {
+        return Vector2.add(
+            point,
+            Vector2.multiplyScalar(direction, this.speed * Time.deltaTime)
+        );
     }
 }
