@@ -15,73 +15,24 @@ export class Projectile extends Component {
     init(origin, direction) {
         this.origin = origin;
         this.entity.position = origin;
-        this.direction = direction;
+        this.head = origin;
         this.tail = origin;
-        this.tailDirection = direction;
+        this.direction = direction;
         this.speed = 50;
         this.collided = false;
     }
 
     update() {
-        this.entity.position = this.#movePointInDirection(this.entity.position, this.direction);
-
-        // TODO: Spatial partitioning
-        for (const wall of Game.walls) {
-            // TODO: Projectile's hitbox is just its movement this frame, not all of the tail
-            const intersection = Physics.lineLineIntersection(
-                this.tail,
-                this.entity.position,
-                wall.startPoint,
-                wall.endPoint
-            );
-
-            if (intersection.intersection) {
-                this.collided = true;
-                this.entity.position = intersection.intersection;
-            }
-        }
-
-        if (this.collided) {
-            this.#movePointInDirection(this.tail, this.tailDirection);
-            // TODO: Use dot product to get direction from entity.position
-            let t = Vector2.dot(
-                this.tailDirection,
-                Vector2.subtract(this.entity.position, this.tail)
-            );
-            console.log(t);
-        }
-
-        // TODO: These boundaries are hard-coded
-        if (this.tail.y < -10 || this.tail.x > 10 || this.tail.y > 10 || this.tail.x < -10) {
-            this.entity.destroy();
-            return;
-        }
-
-        this.tail = Vector2.subtract(
-            this.entity.position,
-            Vector2.multiplyScalar(this.direction, 2)
+        this.head = Vector2.add(
+            this.head,
+            Vector2.multiplyScalar(this.direction, this.speed * Time.deltaTime)
         );
 
-        if (this.#isTailPastOrigin()) this.tail = this.origin;
+        this.#setTailPosition();
 
-        if (!Network.owns(this.entity)) return;
-
-        for (const entity of Game.entities) {
-            // TODO: Entity tags
-            if (!entity.getComponent(Player)) continue;
-
-            if (Network.owns(entity)) continue;
-
-            if (!Physics.lineCircleCollision(
-                this.tail,
-                this.entity.position,
-                entity.position,
-                entity.getComponent(Player).size
-            )) continue;
-
-            Network.emit('projectile_hit', this.entity.id, entity.id);
-            this.entity.destroy();
-            ++entity.getComponent(Player).hitsTaken;
+        switch (this.collided) {
+            case false: this.#stateTravelling(); break;
+            case true: this.#stateCollided(); break;
         }
     }
 
@@ -89,20 +40,83 @@ export class Projectile extends Component {
         Renderer.renderLine('rgb(255, 255, 255)', this.tail, this.entity.position);
     }
 
-    #isTailPastOrigin() {
-        const sqrToTail = Vector2.subtract(this.entity.position, this.tail).sqrMagnitude;
-        const sqrToOrigin = Vector2.subtract(this.entity.position, this.origin).sqrMagnitude;
-        return sqrToTail > sqrToOrigin;
+    collide(pointOfCollision) {
+        this.collided = true;
+        this.entity.position = pointOfCollision;
     }
 
-    /**
-     * @param {Vector2} point
-     * @param {Vector2} direction
-     */
-    #movePointInDirection(point, direction) {
-        return Vector2.add(
-            point,
-            Vector2.multiplyScalar(direction, this.speed * Time.deltaTime)
+    #setTailPosition() {
+        // Set tail a fixed distance behind head
+        this.tail = Vector2.subtract(
+            this.head,
+            Vector2.multiplyScalar(this.direction, 2)
         );
+
+        // If tail is behind origin, set it to origin
+        if (Vector2.dot(
+            Vector2.subtract(this.head, this.tail),
+            Vector2.subtract(this.origin, this.tail)
+        ) > 0)
+            this.tail = this.origin;
+    }
+
+    #stateTravelling() {
+        this.entity.position = this.head;
+
+        if (
+            this.entity.position.y < -Game.SCENE_SIZE.y ||
+            this.entity.position.x > Game.SCENE_SIZE.x ||
+            this.entity.position.y > Game.SCENE_SIZE.y ||
+            this.entity.position.x < -Game.SCENE_SIZE.x
+        ) {
+            this.entity.destroy();
+        }
+
+        // TODO: Spatial partitioning
+        for (const wall of Game.walls) {
+            // TODO: Projectile's hitbox is just its movement this frame, not all of the tail
+            const collision = Physics.lineLineCollision(
+                this.tail,
+                this.entity.position,
+                wall.startPoint,
+                wall.endPoint
+            );
+
+            if (collision.intersection) {
+                // TODO: Emit network event
+                this.collide(collision.intersection);
+                return;
+            }
+        }
+
+        if (!Network.owns(this.entity)) return;
+
+        for (const entity of Game.entities) {
+            if (!entity.hasTag('Player')) continue;
+            if (Network.owns(entity)) continue;
+
+            const collision = Physics.lineCircleCollision(
+                this.tail,
+                this.entity.position,
+                entity.position,
+                entity.getComponent(Player).size
+            )
+            
+            if (!collision) continue;
+
+            Network.emit('projectile_hit', this.entity.id, entity.id, collision);
+            // TODO: Set entity.position to the point of intersection
+            this.collide(collision);
+            ++entity.getComponent(Player).hitsTaken;
+        }
+    }
+
+    #stateCollided() {
+        const t = Vector2.dot(
+            this.direction,
+            Vector2.subtract(this.entity.position, this.tail)
+        );
+
+        if (t <= 0) this.entity.destroy();
     }
 }

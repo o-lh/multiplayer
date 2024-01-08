@@ -32,8 +32,8 @@ export class Network {
             Game.getEntity(id).destroy();
         });
 
-        this.#socket.on('projectile_hit', (projectileID, targetID) => {
-            Game.getEntity(projectileID).destroy();
+        this.#socket.on('projectile_hit', (projectileID, targetID, pointOfCollision) => {
+            Game.getEntity(projectileID).getComponent(Projectile).collide(pointOfCollision);
             ++Game.getEntity(targetID).getComponent(Player).hitsTaken;
         });
     }

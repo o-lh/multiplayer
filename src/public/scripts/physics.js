@@ -5,9 +5,11 @@ export class Physics {
      * @param {Vector2} point
      * @param {Vector2} circleCenter
      * @param {number} circleRadius
+     * @returns The point of intersection, or null if there is no intersection
      */
     static pointCircleCollision(point, circleCenter, circleRadius) {
-        return Vector2.subtract(circleCenter, point).sqrMagnitude <= circleRadius ** 2;
+        if (Vector2.subtract(circleCenter, point).sqrMagnitude <= circleRadius ** 2)
+            return point;
     }
 
     /**
@@ -15,6 +17,7 @@ export class Physics {
      * @param {Vector2} lineEnd
      * @param {Vector2} circleCenter
      * @param {number} circleRadius
+     * @returns The point of intersection, or null if there is no intersection
      */
     static lineCircleCollision(lineStart, lineEnd, circleCenter, circleRadius) {
         const line = Vector2.subtract(lineEnd, lineStart);
@@ -23,9 +26,11 @@ export class Physics {
             return this.pointCircleCollision(lineStart, circleCenter, circleRadius);
 
         const toCircle = Vector2.subtract(circleCenter, lineStart);
-        const t = Math.max(0, Math.min(Vector2.dot(line, toCircle) / line.sqrMagnitude, 1));
-        const closestPoint = Vector2.add(lineStart, Vector2.multiplyScalar(line, t));
+        const t = Vector2.dot(line, toCircle) / line.sqrMagnitude;
+        const clampedT = Math.max(0, Math.min(t, 1));
+        const closestPoint = Vector2.add(lineStart, Vector2.multiplyScalar(line, clampedT));
         return this.pointCircleCollision(closestPoint, circleCenter, circleRadius);
+        // TODO: Return the actual point of intersection, instead of the closest point to the circle's center
     }
 
     /**
@@ -34,7 +39,7 @@ export class Physics {
      * @param {Vector2} lineBStart
      * @param {Vector2} lineBEnd
      */
-    static lineLineIntersection(lineAStart, lineAEnd, lineBStart, lineBEnd) {
+    static lineLineCollision(lineAStart, lineAEnd, lineBStart, lineBEnd) {
         // TODO: When the two lines are parallel or coincident, the denominator is zero
         const t = ((lineAStart.x - lineBStart.x) * (lineBStart.y - lineBEnd.y) -
             (lineAStart.y - lineBStart.y) * (lineBStart.x - lineBEnd.x)) /

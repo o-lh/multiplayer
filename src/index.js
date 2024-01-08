@@ -48,8 +48,8 @@ io.on('connection', (socket) => {
         serializedEntities[index] = entity;
     });
 
-    socket.on('projectile_hit', (projectileID, targetID) => {
-        socket.broadcast.emit('projectile_hit', projectileID, targetID);
+    socket.on('projectile_hit', (projectileID, targetID, pointOfCollision) => {
+        socket.broadcast.emit('projectile_hit', projectileID, targetID, pointOfCollision);
         // TODO: Modify entity on the server as well
     });
 
