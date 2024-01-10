@@ -70,6 +70,7 @@ export class Game {
         for (const entity of Game.entities) {
             for (const component of entity.components) {
                 component.update();
+                if (!entity.destroyed) component.render();
             }
         }
 
@@ -79,7 +80,7 @@ export class Game {
             }
         }
 
-        Renderer.renderScene(Game.entities);
+        Renderer.renderScene();
 
         Game.#clearInput();
 

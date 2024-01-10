@@ -2,6 +2,7 @@ import { Component } from "../component.js";
 import { Game } from "../game.js";
 import { Input } from "../input.js";
 import { Renderer } from "../renderer.js";
+import { Shape } from "../shape.js";
 import { Vector2 } from "../vector2.js";
 
 export class WallCreator extends Component {
@@ -29,16 +30,20 @@ export class WallCreator extends Component {
 
     render() {
         if (!this.startPoint || !this.endPoint) return;
-        
-        Renderer.renderLine('rgb(255, 255, 255)', this.startPoint, this.endPoint);
 
-        Renderer.renderText(
+        Renderer.render(3, Shape.Line, 'rgb(255, 255, 255)', this.startPoint, this.endPoint);
+
+        Renderer.render(
+            3,
+            Shape.Text,
             'rgb(255, 255, 255)',
             '1',
             new Vector2(this.startPoint.x, this.startPoint.y - 0.2)
         );
 
-        Renderer.renderText(
+        Renderer.render(
+            3,
+            Shape.Text,
             'rgb(255, 255, 255)',
             '2',
             new Vector2(this.endPoint.x, this.endPoint.y - 0.2)

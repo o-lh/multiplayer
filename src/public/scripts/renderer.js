@@ -1,3 +1,4 @@
+import { Shape } from "./shape.js";
 import { Vector2 } from "./vector2.js";
 
 export class Renderer {
@@ -7,6 +8,8 @@ export class Renderer {
     static context = this.canvas.getContext('2d');
     // TODO: Camera class
     static viewSize = new Vector2(20, 20);
+    // TODO: Create RenderLayer class?
+    static #layers = [];
 
     static init() {
         this.#setCanvasProperties();
@@ -44,19 +47,32 @@ export class Renderer {
         );
     }
 
-    /**
-     * @param {Entity[]} entities
-     */
-    static renderScene(entities) {
+    static renderScene() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // TODO: Render layers
-
-        for (const entity of entities) {
-            for (const component of entity.components) {
-                component.render();
+        for (const layer of this.#layers) {
+            for (const renderItem of layer) {
+                switch (renderItem.shape) {
+                    case Shape.Circle: this.#renderCircle(...renderItem.data); break;
+                    case Shape.Line: this.#renderLine(...renderItem.data); break;
+                    case Shape.Text: this.#renderText(...renderItem.data); break;
+                }
             }
         }
+
+        this.#layers = [];
+    }
+
+    /**
+     * @param {number} layer
+     * @param {Shape} shape
+     * @param  {...any} data
+     */
+    static render(layer, shape, ...data) {
+        if (layer < 0) layer = 0;
+        while (layer >= this.#layers.length) this.#layers.push([]);
+
+        this.#layers[layer].push({ shape: shape, data: data });
     }
 
     /**
@@ -64,7 +80,7 @@ export class Renderer {
      * @param {Vector2} position
      * @param {number} radius
      */
-    static renderCircle(colour, position, radius) {
+    static #renderCircle(colour, position, radius) {
         const screenSpacePosition = this.worldSpacePointToScreenSpace(position);
 
         this.context.fillStyle = colour;
@@ -85,7 +101,7 @@ export class Renderer {
      * @param {Vector2} start
      * @param {Vector2} end
      */
-    static renderLine(colour, start, end) {
+    static #renderLine(colour, start, end) {
         const screenSpaceStart = this.worldSpacePointToScreenSpace(start);
         const screenSpaceEnd = this.worldSpacePointToScreenSpace(end);
 
@@ -102,7 +118,7 @@ export class Renderer {
      * @param {string} text
      * @param {Vector2} position
      */
-    static renderText(colour, text, position) {
+    static #renderText(colour, text, position) {
         const screenSpacePosition = this.worldSpacePointToScreenSpace(position);
 
         this.context.fillStyle = colour;

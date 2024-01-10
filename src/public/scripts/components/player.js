@@ -4,6 +4,7 @@ import { Input } from "../input.js";
 import { Network } from "../network.js";
 import { Projectile } from "./projectile.js";
 import { Renderer } from "../renderer.js";
+import { Shape } from "../shape.js";
 import { Time } from "../time.js";
 import { Vector2 } from "../vector2.js";
 
@@ -66,11 +67,13 @@ export class Player extends Component {
     }
 
     render() {
-        // TODO: No need to calculate this every frame
+        // TODO: Network.owns needs to be checked after being received over Socket.IO, but every frame is excessive
         const colour = Network.owns(this.entity) ? 'rgb(0, 255, 0)' : 'rgb(255, 0, 0)';
 
-        Renderer.renderCircle(colour, this.entity.position, this.size);
-        Renderer.renderText(
+        Renderer.render(2, Shape.Circle, colour, this.entity.position, this.size);
+        Renderer.render(
+            4,
+            Shape.Text,
             colour,
             this.hitsTaken,
             new Vector2(this.entity.position.x, this.entity.position.y - this.size - 0.1)
