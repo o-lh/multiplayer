@@ -56,6 +56,7 @@ export class Renderer {
                     case Shape.Circle: this.#renderCircle(...renderItem.data); break;
                     case Shape.Line: this.#renderLine(...renderItem.data); break;
                     case Shape.Text: this.#renderText(...renderItem.data); break;
+                    default: console.error(`Could not render shape: ${JSON.stringify(renderItem)}`);
                 }
             }
         }
