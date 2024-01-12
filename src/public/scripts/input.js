@@ -1,5 +1,5 @@
-import { Renderer } from "./renderer.js";
-import { Vector2 } from "./vector2.js";
+import { Renderer } from './renderer.js';
+import { Vector2 } from './vector2.js';
 
 export class Input {
     /** @type {string[]} */

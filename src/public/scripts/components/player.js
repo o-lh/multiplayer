@@ -1,12 +1,12 @@
-import { Component } from "../component.js";
-import { Game } from "../game.js";
-import { Input } from "../input.js";
-import { Network } from "../network.js";
-import { Projectile } from "./projectile.js";
-import { Renderer } from "../renderer.js";
-import { Shape } from "../shape.js";
-import { Time } from "../time.js";
-import { Vector2 } from "../vector2.js";
+import { Component } from '../component.js';
+import { Game } from '../game.js';
+import { Input } from '../input.js';
+import { Network } from '../network.js';
+import { Projectile } from './projectile.js';
+import { Renderer } from '../renderer.js';
+import { Shape } from '../shape.js';
+import { Time } from '../time.js';
+import { Vector2 } from '../vector2.js';
 
 export class Player extends Component {
     start() {

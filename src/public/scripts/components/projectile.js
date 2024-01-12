@@ -1,12 +1,12 @@
-import { Component } from "../component.js";
-import { Game } from "../game.js";
-import { Network } from "../network.js";
-import { Physics } from "../physics.js";
-import { Player } from "./player.js";
-import { Renderer } from "../renderer.js";
-import { Shape } from "../shape.js";
+import { Component } from '../component.js';
+import { Game } from '../game.js';
+import { Network } from '../network.js';
+import { Physics } from '../physics.js';
+import { Player } from './player.js';
+import { Renderer } from '../renderer.js';
+import { Shape } from '../shape.js';
 import { Time } from '../time.js';
-import { Vector2 } from "../vector2.js";
+import { Vector2 } from '../vector2.js';
 
 export class Projectile extends Component {
     /**

@@ -1,5 +1,5 @@
-import { Shape } from "./shape.js";
-import { Vector2 } from "./vector2.js";
+import { Shape } from './shape.js';
+import { Vector2 } from './vector2.js';
 
 export class Renderer {
     /** @type {HTMLCanvasElement} */

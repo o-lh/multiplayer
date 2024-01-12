@@ -4,7 +4,7 @@ import { Network } from './network.js';
 import { Player } from './components/player.js';
 import { Renderer } from './renderer.js';
 import { Time } from './time.js';
-import { Vector2 } from "./vector2.js";
+import { Vector2 } from './vector2.js';
 import { WallCreator } from './components/wall-creator.js';
 
 export class Game {

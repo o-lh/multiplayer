@@ -1,8 +1,8 @@
-import { Entity } from "./entity.js";
-import { Game } from "./game.js";
-import { Player } from "./components/player.js";
-import { Projectile } from "./components/projectile.js";
-import { Vector2 } from "./vector2.js";
+import { Entity } from './entity.js';
+import { Game } from './game.js';
+import { Player } from './components/player.js';
+import { Projectile } from './components/projectile.js';
+import { Vector2 } from './vector2.js';
 
 export class Network {
     static #socket = io();
