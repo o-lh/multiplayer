@@ -1,5 +1,6 @@
 import { Component } from '../component.js';
 import { Game } from '../game.js';
+import { Wall } from './wall.js';
 import { Network } from '../network.js';
 import { Physics } from '../physics.js';
 import { Player } from './player.js';
@@ -74,7 +75,11 @@ export class Projectile extends Component {
         }
 
         // TODO: Spatial partitioning
-        for (const wall of Game.walls) {
+        for (const entity of Game.entities) {
+            if (!entity.hasTag('Wall')) continue;
+
+            const wall = entity.getComponent(Wall);
+
             // TODO: Projectile's hitbox is just its movement this frame, not all of the tail
             const collision = Physics.lineLineCollision(
                 this.tail,
@@ -106,7 +111,6 @@ export class Projectile extends Component {
             if (!collision) continue;
 
             Network.emit('projectile_hit', this.entity.id, entity.id, collision);
-            // TODO: Set entity.position to the point of intersection
             this.collide(collision);
             ++entity.getComponent(Player).hitsTaken;
         }

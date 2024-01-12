@@ -5,7 +5,7 @@ import { Player } from './components/player.js';
 import { Renderer } from './renderer.js';
 import { Time } from './time.js';
 import { Vector2 } from './vector2.js';
-import { WallCreator } from './components/wall-creator.js';
+import { Wall } from './components/wall.js';
 
 export class Game {
     // TODO: Scene class
@@ -54,7 +54,17 @@ export class Game {
 
         Network.emit('create_entity', player, true);
 
-        Game.addEntity().addComponent(WallCreator);
+        const wall1Entity = Game.addEntity();
+        wall1Entity.addTag('Wall');
+        const wall1 = wall1Entity.addComponent(Wall);
+        wall1.startPoint = new Vector2(-1, -1);
+        wall1.endPoint = new Vector2(1, -1);
+
+        const wall2Entity = Game.addEntity();
+        wall2Entity.addTag('Wall');
+        const wall2 = wall2Entity.addComponent(Wall);
+        wall2.startPoint = new Vector2(1, -1);
+        wall2.endPoint = new Vector2(3, 1);
 
         requestAnimationFrame(Game.#update);
     }
