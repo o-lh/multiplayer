@@ -5,7 +5,7 @@ import { Player } from './components/player.js';
 import { Renderer } from './renderer.js';
 import { Time } from './time.js';
 import { Vector2 } from './vector2.js';
-import { Wall } from './components/wall.js';
+import { createWall } from './custom-entities/wall.js';
 
 export class Game {
     // TODO: Scene class
@@ -56,47 +56,13 @@ export class Game {
 
         const unit = 10 / 3.5;
 
-        const wall1Entity = Game.addEntity();
-        wall1Entity.addTag('Wall');
-        const wall1 = wall1Entity.addComponent(Wall);
-        wall1.startPoint = new Vector2(10-unit, -10);
-        wall1.endPoint = new Vector2(10-unit, -10+3*unit);
-
-        const wall2Entity = Game.addEntity();
-        wall2Entity.addTag('Wall');
-        const wall2 = wall2Entity.addComponent(Wall);
-        wall2.startPoint = new Vector2(-10+unit, -10+unit);
-        wall2.endPoint = new Vector2(10-2*unit, -10+unit);
-
-        const wall3Entity = Game.addEntity();
-        wall3Entity.addTag('Wall');
-        const wall3 = wall3Entity.addComponent(Wall);
-        wall3.startPoint = new Vector2(10-2*unit, -10+unit);
-        wall3.endPoint = new Vector2(10-2*unit, 10-2*unit);
-
-        const wall4Entity = Game.addEntity();
-        wall4Entity.addTag('Wall');
-        const wall4 = wall4Entity.addComponent(Wall);
-        wall4.startPoint = new Vector2(-10+2*unit, -10+2*unit);
-        wall4.endPoint = new Vector2(-10+2*unit, 10-unit);
-
-        const wall5Entity = Game.addEntity();
-        wall5Entity.addTag('Wall');
-        const wall5 = wall5Entity.addComponent(Wall);
-        wall5.startPoint = new Vector2(-10+unit, 0);
-        wall5.endPoint = new Vector2(-10+unit, 10-unit);
-
-        const wall6Entity = Game.addEntity();
-        wall6Entity.addTag('Wall');
-        const wall6 = wall6Entity.addComponent(Wall);
-        wall6.startPoint = new Vector2(0, 10-2*unit);
-        wall6.endPoint = new Vector2(10-unit, 10-2*unit);
-
-        const wall7Entity = Game.addEntity();
-        wall7Entity.addTag('Wall');
-        const wall7 = wall7Entity.addComponent(Wall);
-        wall7.startPoint = new Vector2(-10+2*unit, 10-unit);
-        wall7.endPoint = new Vector2(10-2*unit, 10-unit);
+        createWall(new Vector2(10-unit, -10), new Vector2(10-unit, -10+3*unit));
+        createWall(new Vector2(-10+unit, -10+unit), new Vector2(10-2*unit, -10+unit));
+        createWall(new Vector2(10-2*unit, -10+unit), new Vector2(10-2*unit, 10-2*unit));
+        createWall(new Vector2(-10+2*unit, -10+2*unit), new Vector2(-10+2*unit, 10-unit));
+        createWall(new Vector2(-10+unit, 0), new Vector2(-10+unit, 10-unit));
+        createWall(new Vector2(0, 10-2*unit), new Vector2(10-unit, 10-2*unit));
+        createWall(new Vector2(-10+2*unit, 10-unit), new Vector2(10-2*unit, 10-unit));
 
         requestAnimationFrame(Game.#update);
     }
