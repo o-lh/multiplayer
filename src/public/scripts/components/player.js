@@ -2,11 +2,13 @@ import { Component } from '../component.js';
 import { Game } from '../game.js';
 import { Input } from '../input.js';
 import { Network } from '../network.js';
+import { Physics } from '../physics.js';
 import { Projectile } from './projectile.js';
 import { Renderer } from '../renderer.js';
 import { Shape } from '../shape.js';
 import { Time } from '../time.js';
 import { Vector2 } from '../vector2.js';
+import { Wall } from './wall.js';
 
 export class Player extends Component {
     start() {
@@ -37,6 +39,31 @@ export class Player extends Component {
             this.entity.position.y = Game.SCENE_SIZE.y / 2 - this.size;
         if (this.entity.position.x - this.size < -Game.SCENE_SIZE.x / 2)
             this.entity.position.x = -Game.SCENE_SIZE.x / 2 + this.size;
+
+        // TODO: Spatial partitioning
+        for (const entity of Game.entities) {
+            if (!entity.hasTag('Wall')) continue;
+
+            const wall = entity.getComponent(Wall);
+
+            const collision = Physics.lineCircleCollision(
+                wall.startPoint,
+                wall.endPoint,
+                this.entity.position,
+                this.size
+            );
+
+            if (collision) {
+                const relativeToCollision = Vector2.subtract(this.entity.position, collision);
+                this.entity.position = Vector2.add(
+                    collision,
+                    Vector2.multiplyScalar(
+                        relativeToCollision.normalized,
+                        this.size
+                    )
+                );
+            }
+        }
 
         Network.emit('move_entity', this.entity.id, this.entity.position);
 
