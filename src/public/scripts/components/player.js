@@ -11,13 +11,11 @@ import { Vector2 } from '../vector2.js';
 import { Wall } from './wall.js';
 
 export class Player extends Component {
-    start() {
-        this.size = 0.25;
-        this.speed = 4;
-        this.attackInterval = 0.2;
-        this.attackT = 0;
-        this.hitsTaken = 0;
-    }
+    size = 0.25;
+    speed = 4;
+    attackInterval = 0.2;
+    attackT = 0;
+    #hitsTaken = 0;
 
     update() {
         if (!Network.owns(this.entity)) return;
@@ -102,8 +100,17 @@ export class Player extends Component {
             4,
             Shape.Text,
             colour,
-            this.hitsTaken,
+            this.#hitsTaken,
             new Vector2(this.entity.position.x, this.entity.position.y - this.size - 0.1)
         );
+    }
+
+    takeDamage() {
+        ++this.#hitsTaken;
+        if (Network.owns(this.entity))
+            this.entity.position = new Vector2(
+                (Math.random() * Game.SCENE_SIZE.x) - Game.SCENE_SIZE.x / 2,
+                (Math.random() * Game.SCENE_SIZE.y) - Game.SCENE_SIZE.y / 2
+            );
     }
 }

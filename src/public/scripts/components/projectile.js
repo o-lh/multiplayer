@@ -112,7 +112,7 @@ export class Projectile extends Component {
 
             Network.emit('projectile_hit', this.entity.id, entity.id, collision);
             this.collide(collision);
-            ++entity.getComponent(Player).hitsTaken;
+            entity.getComponent(Player).takeDamage();
         }
     }
 
