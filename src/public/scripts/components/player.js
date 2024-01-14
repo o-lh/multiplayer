@@ -1,6 +1,7 @@
 import { Component } from '../component.js';
 import { Game } from '../game.js';
 import { Input } from '../input.js';
+import { LineCollider } from './line-collider.js';
 import { Network } from '../network.js';
 import { Physics } from '../physics.js';
 import { Projectile } from './projectile.js';
@@ -8,7 +9,6 @@ import { Renderer } from '../renderer.js';
 import { Shape } from '../shape.js';
 import { Time } from '../time.js';
 import { Vector2 } from '../vector2.js';
-import { Wall } from './wall.js';
 
 export class Player extends Component {
     size = 0.25;
@@ -42,11 +42,11 @@ export class Player extends Component {
         for (const entity of Game.entities) {
             if (!entity.hasTag('Wall')) continue;
 
-            const wall = entity.getComponent(Wall);
+            const wallCollider = entity.getComponent(LineCollider);
 
             const collision = Physics.lineCircleCollision(
-                wall.startPoint,
-                wall.endPoint,
+                wallCollider.startPoint,
+                wallCollider.endPoint,
                 this.entity.position,
                 this.size
             );

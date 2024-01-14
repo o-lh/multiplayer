@@ -1,6 +1,6 @@
 import { Component } from '../component.js';
 import { Game } from '../game.js';
-import { Wall } from './wall.js';
+import { LineCollider } from './line-collider.js';
 import { Network } from '../network.js';
 import { Physics } from '../physics.js';
 import { Player } from './player.js';
@@ -78,14 +78,14 @@ export class Projectile extends Component {
         for (const entity of Game.entities) {
             if (!entity.hasTag('Wall')) continue;
 
-            const wall = entity.getComponent(Wall);
+            const wallCollider = entity.getComponent(LineCollider);
 
             // TODO: Projectile's hitbox is just its movement this frame, not all of the tail
             const collision = Physics.lineLineCollision(
                 this.tail,
                 this.entity.position,
-                wall.startPoint,
-                wall.endPoint
+                wallCollider.startPoint,
+                wallCollider.endPoint
             );
 
             if (collision.intersection) {
