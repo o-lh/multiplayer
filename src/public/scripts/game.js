@@ -5,6 +5,7 @@ import { Player } from './components/player.js';
 import { Renderer } from './renderer.js';
 import { Time } from './time.js';
 import { Vector2 } from './vector2.js';
+import { createInvisibleWall } from './custom-entities/invisible-wall.js';
 import { createWall } from './custom-entities/wall.js';
 
 export class Game {
@@ -44,6 +45,23 @@ export class Game {
     }
 
     static #start() {
+        createInvisibleWall(
+            new Vector2(-Game.SCENE_SIZE.x / 2, -Game.SCENE_SIZE.y / 2),
+            new Vector2(Game.SCENE_SIZE.x / 2, -Game.SCENE_SIZE.y / 2)
+        );
+        createInvisibleWall(
+            new Vector2(Game.SCENE_SIZE.x / 2, -Game.SCENE_SIZE.y / 2),
+            new Vector2(Game.SCENE_SIZE.x / 2, Game.SCENE_SIZE.y / 2)
+        );
+        createInvisibleWall(
+            new Vector2(Game.SCENE_SIZE.x / 2, Game.SCENE_SIZE.y / 2),
+            new Vector2(-Game.SCENE_SIZE.x / 2, Game.SCENE_SIZE.y / 2)
+        );
+        createInvisibleWall(
+            new Vector2(-Game.SCENE_SIZE.x / 2, Game.SCENE_SIZE.y / 2),
+            new Vector2(-Game.SCENE_SIZE.x / 2, -Game.SCENE_SIZE.y / 2)
+        );
+
         const player = Game.addEntity();
         player.addTag('Player');
         player.position = new Vector2(

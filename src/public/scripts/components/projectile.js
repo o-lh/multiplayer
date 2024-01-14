@@ -65,15 +65,6 @@ export class Projectile extends Component {
     #stateTravelling() {
         this.entity.position = this.head;
 
-        if (
-            this.entity.position.y < -Game.SCENE_SIZE.y ||
-            this.entity.position.x > Game.SCENE_SIZE.x ||
-            this.entity.position.y > Game.SCENE_SIZE.y ||
-            this.entity.position.x < -Game.SCENE_SIZE.x
-        ) {
-            this.entity.destroy();
-        }
-
         // TODO: Spatial partitioning
         for (const entity of Game.entities) {
             if (!entity.hasTag('Wall')) continue;

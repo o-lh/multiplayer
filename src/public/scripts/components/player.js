@@ -29,15 +29,6 @@ export class Player extends Component {
         if (Input.keyHeld('KeyA') || Input.keyHeld('ArrowLeft'))
             this.entity.position.x -= this.speed * Time.deltaTime;
 
-        if (this.entity.position.y - this.size < -Game.SCENE_SIZE.y / 2)
-            this.entity.position.y = -Game.SCENE_SIZE.y / 2 + this.size;
-        if (this.entity.position.x + this.size > Game.SCENE_SIZE.x / 2)
-            this.entity.position.x = Game.SCENE_SIZE.x / 2 - this.size;
-        if (this.entity.position.y + this.size > Game.SCENE_SIZE.y / 2)
-            this.entity.position.y = Game.SCENE_SIZE.y / 2 - this.size;
-        if (this.entity.position.x - this.size < -Game.SCENE_SIZE.x / 2)
-            this.entity.position.x = -Game.SCENE_SIZE.x / 2 + this.size;
-
         // TODO: Spatial partitioning
         for (const entity of Game.entities) {
             if (!entity.hasTag('Wall')) continue;
