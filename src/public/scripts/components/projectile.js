@@ -71,6 +71,8 @@ export class Projectile extends Component {
 
             const wallCollider = entity.getComponent(LineCollider);
 
+            if (!wallCollider.enabled) continue;
+
             // TODO: Projectile's hitbox is just its movement this frame, not all of the tail
             const collision = Physics.lineLineCollision(
                 this.tail,

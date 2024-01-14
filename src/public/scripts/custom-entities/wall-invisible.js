@@ -1,7 +1,7 @@
 import { Game } from '../game.js';
 import { LineCollider } from '../components/line-collider.js';
 
-export function createInvisibleWall(startPoint, endPoint) {
+export function createWallInvisible(startPoint, endPoint) {
     const entity = Game.addEntity();
     entity.addTag('Wall');
 

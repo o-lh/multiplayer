@@ -35,6 +35,8 @@ export class Player extends Component {
 
             const wallCollider = entity.getComponent(LineCollider);
 
+            if (!wallCollider.enabled) continue;
+
             const collision = Physics.lineCircleCollision(
                 wallCollider.startPoint,
                 wallCollider.endPoint,

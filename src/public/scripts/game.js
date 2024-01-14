@@ -5,8 +5,9 @@ import { Player } from './components/player.js';
 import { Renderer } from './renderer.js';
 import { Time } from './time.js';
 import { Vector2 } from './vector2.js';
-import { createInvisibleWall } from './custom-entities/invisible-wall.js';
 import { createWall } from './custom-entities/wall.js';
+import { createWallAlternating } from './custom-entities/wall-alternating.js'
+import { createWallInvisible } from './custom-entities/wall-invisible.js';
 
 export class Game {
     // TODO: Scene class
@@ -45,19 +46,19 @@ export class Game {
     }
 
     static #start() {
-        createInvisibleWall(
+        createWallInvisible(
             new Vector2(-Game.SCENE_SIZE.x / 2, -Game.SCENE_SIZE.y / 2),
             new Vector2(Game.SCENE_SIZE.x / 2, -Game.SCENE_SIZE.y / 2)
         );
-        createInvisibleWall(
+        createWallInvisible(
             new Vector2(Game.SCENE_SIZE.x / 2, -Game.SCENE_SIZE.y / 2),
             new Vector2(Game.SCENE_SIZE.x / 2, Game.SCENE_SIZE.y / 2)
         );
-        createInvisibleWall(
+        createWallInvisible(
             new Vector2(Game.SCENE_SIZE.x / 2, Game.SCENE_SIZE.y / 2),
             new Vector2(-Game.SCENE_SIZE.x / 2, Game.SCENE_SIZE.y / 2)
         );
-        createInvisibleWall(
+        createWallInvisible(
             new Vector2(-Game.SCENE_SIZE.x / 2, Game.SCENE_SIZE.y / 2),
             new Vector2(-Game.SCENE_SIZE.x / 2, -Game.SCENE_SIZE.y / 2)
         );
@@ -76,11 +77,59 @@ export class Game {
 
         createWall(new Vector2(10-unit, -10), new Vector2(10-unit, -10+3*unit));
         createWall(new Vector2(-10+unit, -10+unit), new Vector2(10-2*unit, -10+unit));
-        createWall(new Vector2(10-2*unit, -10+unit), new Vector2(10-2*unit, 10-2*unit));
-        createWall(new Vector2(-10+2*unit, -10+2*unit), new Vector2(-10+2*unit, 10-unit));
+        createWall(new Vector2(-10+2*unit, -10+2*unit), new Vector2(-10+2*unit, 10-2*unit));
+        createWall(new Vector2(10-2*unit, -10+2*unit), new Vector2(10-2*unit, 10-2*unit));
         createWall(new Vector2(-10+unit, 0), new Vector2(-10+unit, 10-unit));
         createWall(new Vector2(0, 10-2*unit), new Vector2(10-unit, 10-2*unit));
         createWall(new Vector2(-10+2*unit, 10-unit), new Vector2(10-2*unit, 10-unit));
+
+        createWallAlternating(
+            new Vector2(-10+2*unit, -10+unit),
+            new Vector2(-10+2*unit, -10+2*unit),
+            false
+        );
+
+        createWallAlternating(
+            new Vector2(10-2*unit, -10+unit),
+            new Vector2(10-2*unit, -10+2*unit),
+            true
+        );
+
+        createWallAlternating(
+            new Vector2(10-2*unit, 10-2*unit),
+            new Vector2(10-2*unit, 10-unit),
+            false
+        );
+
+        createWallAlternating(
+            new Vector2(-10+2*unit, 10-2*unit),
+            new Vector2(-10+2*unit, 10-unit),
+            true
+        );
+
+        createWallAlternating(
+            new Vector2(10-2*unit, -10+unit),
+            new Vector2(10-unit, -10+unit),
+            false
+        );
+
+        createWallAlternating(
+            new Vector2(10-2*unit, -10+3*unit),
+            new Vector2(10-unit, -10+3*unit),
+            true
+        );
+
+        createWallAlternating(
+            new Vector2(-10+1*unit, 10-unit),
+            new Vector2(-10+2*unit, 10-unit),
+            false
+        );
+
+        createWallAlternating(
+            new Vector2(-10+1*unit, 0),
+            new Vector2(-10+2*unit, 0),
+            true
+        );
 
         requestAnimationFrame(Game.#update);
     }
@@ -95,6 +144,8 @@ export class Game {
 
         for (const entity of Game.entities) {
             for (const component of entity.components) {
+                if (!component.enabled) continue;
+
                 component.update();
                 if (!entity.destroyed) component.render();
             }
