@@ -1,6 +1,7 @@
 import { Entity } from './entity.js';
 
 export class Component {
+    enabled = true;
     #entity;
 
     get entity() {
