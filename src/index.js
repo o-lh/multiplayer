@@ -26,9 +26,12 @@ const sockets = [];
 /** @type {any[]} */
 const serializedEntities = [];
 
+let doorState = 0;
+
 io.on('connection', (socket) => {
     sockets.push(socket);
     socket.emit('connected');
+    socket.emit('doorState', doorState);
 
     for (const serializedEntity of serializedEntities) {
         socket.emit('create_entity', serializedEntity);
@@ -70,8 +73,6 @@ io.on('connection', (socket) => {
 server.listen(1337, () => {
     console.log('Listening on port 1337');
 });
-
-let doorState = 0;
 
 function update() {
     doorState = doorState === 0 ? 1 : 0;

@@ -16,7 +16,6 @@ export function createWallAlternating(startPoint, endPoint, oppositeAlternation)
     renderer.startPoint = startPoint;
     renderer.endPoint = endPoint;
 
-    // TODO: Need to get current doorState from server for initial state
     const alternator = entity.addComponent(AlternatingWall);
     alternator.oppositeAlternation = oppositeAlternation;
 
