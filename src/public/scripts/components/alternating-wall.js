@@ -1,19 +1,19 @@
 import { Component } from '../component.js';
-import { Time } from '../time.js';
 import { LineCollider } from './line-collider.js';
 import { LineRenderer } from './line-renderer.js';
+import { Network } from '../network.js';
 
 export class AlternatingWall extends Component {
     collider = this.entity.getComponent(LineCollider);
     renderer = this.entity.getComponent(LineRenderer);
-    t = 0;
+    oppositeAlternation;
 
-    update() {
-        this.t += Time.deltaTime;
-        if (this.t >= 1) {
-            this.t -= 1;
-            this.collider.enabled = !this.collider.enabled;
-            this.renderer.enabled = !this.renderer.enabled;
-        }
+    start() {
+        Network.subscribe('doorState', (doorState) => {
+            this.collider.enabled =
+                doorState === 1 ? this.oppositeAlternation : !this.oppositeAlternation;
+            this.renderer.enabled =
+                doorState === 1 ? this.oppositeAlternation : !this.oppositeAlternation;
+        });
     }
 }

@@ -20,11 +20,14 @@ app.use(express.static(join(__dirname, 'public')));
 // - https://socket.io/docs/v4/client-options/#auth
 // - https://socket.io/how-to/deal-with-cookies
 
+const sockets = [];
+
 // TODO: /shared or /common or /engine folder?
 /** @type {any[]} */
 const serializedEntities = [];
 
 io.on('connection', (socket) => {
+    sockets.push(socket);
     socket.emit('connected');
 
     for (const serializedEntity of serializedEntities) {
@@ -67,3 +70,15 @@ io.on('connection', (socket) => {
 server.listen(1337, () => {
     console.log('Listening on port 1337');
 });
+
+let doorState = 0;
+
+function update() {
+    doorState = doorState === 0 ? 1 : 0;
+
+    for (const socket of sockets) {
+        socket.emit('doorState', doorState);
+    }
+}
+
+setInterval(update, 1000);

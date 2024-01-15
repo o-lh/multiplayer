@@ -6,6 +6,7 @@ import { Vector2 } from './vector2.js';
 
 export class Network {
     static #socket = io();
+    static #subscriptions = {};
 
     static #componentConstructors = { Projectile: Projectile, Player: Player };
     static #objectConstructors = { Vector2: Vector2 };
@@ -36,6 +37,13 @@ export class Network {
             Game.getEntity(projectileID)?.getComponent(Projectile).collide(pointOfCollision);
             Game.getEntity(targetID).getComponent(Player).takeDamage();
         });
+    }
+
+    /**
+     * @param {string} event
+     */
+    static subscribe(event, listener) {
+        this.#socket.on(event, listener);
     }
 
     /**
