@@ -53,6 +53,7 @@ export class Renderer {
         for (const layer of this.#layers) {
             for (const renderItem of layer) {
                 switch (renderItem.shape) {
+                    case Shape.Rectangle: this.#renderRectangle(...renderItem.data); break;
                     case Shape.Circle: this.#renderCircle(...renderItem.data); break;
                     case Shape.Line: this.#renderLine(...renderItem.data); break;
                     case Shape.Text: this.#renderText(...renderItem.data); break;
@@ -74,6 +75,25 @@ export class Renderer {
         while (layer >= this.#layers.length) this.#layers.push([]);
 
         this.#layers[layer].push({ shape: shape, data: data });
+    }
+
+    /**
+     * @param {Vector2} topLeftPoint
+     * @param {Vector2} size
+     */
+    static #renderRectangle(colour, topLeftPoint, size) {
+        const screenSpacePoint = this.worldSpacePointToScreenSpace(topLeftPoint);
+        const screenSpaceWidth = this.worldSpaceLengthToScreenSpace(size.x);
+        const screenSpaceHeight = this.worldSpaceLengthToScreenSpace(size.y);
+
+        this.context.fillStyle = colour;
+        this.context.rect(
+            screenSpacePoint.x,
+            screenSpacePoint.y,
+            screenSpaceWidth,
+            screenSpaceHeight
+        );
+        this.context.fill();
     }
 
     /**

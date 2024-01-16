@@ -1,4 +1,5 @@
 import { Entity } from './entity.js';
+import { Health } from './components/health.js';
 import { Input } from './input.js';
 import { Network } from './network.js';
 import { Player } from './components/player.js';
@@ -70,6 +71,7 @@ export class Game {
             (Math.random() * Game.SCENE_SIZE.y) - Game.SCENE_SIZE.y / 2
         );
         player.addComponent(Player);
+        player.addComponent(Health);
 
         Network.emit('create_entity', player, true);
 

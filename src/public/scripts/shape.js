@@ -1,5 +1,6 @@
 export const Shape = {
-    Circle: 0,
-    Line: 1,
-    Text: 2
+    Rectangle: 0,
+    Circle: 1,
+    Line: 2,
+    Text: 3
 };

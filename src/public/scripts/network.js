@@ -1,5 +1,6 @@
 import { Entity } from './entity.js';
 import { Game } from './game.js';
+import { Health } from './components/health.js';
 import { Player } from './components/player.js';
 import { Projectile } from './components/projectile.js';
 import { Vector2 } from './vector2.js';
@@ -8,7 +9,7 @@ export class Network {
     static #socket = io();
     static #subscriptions = {};
 
-    static #componentConstructors = { Projectile: Projectile, Player: Player };
+    static #componentConstructors = { Projectile: Projectile, Player: Player, Health: Health };
     static #objectConstructors = { Vector2: Vector2 };
 
     /**
