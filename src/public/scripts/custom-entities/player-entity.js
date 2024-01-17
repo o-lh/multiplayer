@@ -9,7 +9,7 @@ import { Vector2 } from '../vector2.js';
  * @param {number} healthCurrent
  */
 export function createPlayer(position, healthMaximum, healthCurrent) {
-    const entity = Game.addEntity(id);
+    const entity = Game.addEntity();
     entity.addTag('Player');
     entity.position = position;
 
