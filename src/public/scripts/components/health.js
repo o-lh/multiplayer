@@ -16,9 +16,19 @@ export class Health extends Component {
         Renderer.render(
             5,
             Shape.Rectangle,
-            'white',
+            'black',
             healthBarPosition,
             new Vector2(0.8, 0.1)
+        );
+
+        const healthBarFill = 0.8 * this.current / this.maximum;
+
+        Renderer.render(
+            5,
+            Shape.Rectangle,
+            'white',
+            healthBarPosition,
+            new Vector2(healthBarFill, 0.1)
         );
     }
 

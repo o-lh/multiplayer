@@ -71,7 +71,9 @@ export class Game {
             (Math.random() * Game.SCENE_SIZE.y) - Game.SCENE_SIZE.y / 2
         );
         player.addComponent(Player);
-        player.addComponent(Health);
+        const health = player.addComponent(Health);
+        health.maximum = 100;
+        health.current = 100;
 
         Network.emit('create_entity', player, true);
 

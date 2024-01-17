@@ -87,13 +87,12 @@ export class Renderer {
         const screenSpaceHeight = this.worldSpaceLengthToScreenSpace(size.y);
 
         this.context.fillStyle = colour;
-        this.context.rect(
+        this.context.fillRect(
             screenSpacePoint.x,
             screenSpacePoint.y,
             screenSpaceWidth,
             screenSpaceHeight
         );
-        this.context.fill();
     }
 
     /**
