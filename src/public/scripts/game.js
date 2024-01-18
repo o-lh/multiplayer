@@ -63,14 +63,14 @@ export class Game {
             new Vector2(-Game.SCENE_SIZE.x / 2, -Game.SCENE_SIZE.y / 2)
         );
 
-        const player = createPlayer(
-            new Vector2(
+        const player = createPlayer({
+            position: new Vector2(
                 (Math.random() * Game.SCENE_SIZE.x) - Game.SCENE_SIZE.x / 2,
                 (Math.random() * Game.SCENE_SIZE.y) - Game.SCENE_SIZE.y / 2
             ),
-            100,
-            100
-        );
+            healthMaximum: 100,
+            healthCurrent: 100
+        });
 
         Network.emit('create_entity', player, true);
 

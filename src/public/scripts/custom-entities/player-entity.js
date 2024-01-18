@@ -8,8 +8,10 @@ import { Vector2 } from '../vector2.js';
  * @param {number} healthMaximum
  * @param {number} healthCurrent
  */
-export function createPlayer(position, healthMaximum, healthCurrent) {
-    const entity = Game.addEntity();
+export function createPlayer({
+    id = undefined, position, healthMaximum, healthCurrent
+}) {
+    const entity = Game.addEntity(id);
     entity.addTag('Player');
     entity.position = position;
 
