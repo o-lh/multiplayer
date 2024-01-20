@@ -4,11 +4,11 @@ import { Input } from '../input.js';
 import { LineCollider } from './line-collider.js';
 import { Network } from '../network.js';
 import { Physics } from '../physics.js';
-import { Projectile } from './projectile.js';
 import { Renderer } from '../renderer.js';
 import { Shape } from '../shape.js';
 import { Time } from '../time.js';
 import { Vector2 } from '../vector2.js';
+import { createProjectile } from '../custom-entities/projectile-entity.js';
 
 export class Player extends Component {
     size = 0.25;
@@ -60,21 +60,20 @@ export class Player extends Component {
 
         if (Input.mouseHeld(0)) {
             if (this.attackT <= 0) {
-                const clickPosition = Input.mousePositionWorldSpace;
+                const direction = Vector2.subtract(
+                    Input.mousePositionWorldSpace,
+                    this.entity.position
+                ).normalized;
 
-                const direction = Vector2.subtract(clickPosition, this.entity.position).normalized;
-
-                const entity = Game.addEntity();
-
-                entity.addComponent(Projectile).init(
-                    Vector2.add(
+                const projectile = createProjectile({
+                    origin: Vector2.add(
                         structuredClone(this.entity.position),
                         Vector2.multiplyScalar(direction, this.size)
                     ),
-                    direction
-                );
+                    direction: direction
+                });
 
-                Network.emit('create_entity', entity, false);
+                Network.emit('create_entity', projectile, false);
 
                 this.attackT += this.attackInterval;
             }
