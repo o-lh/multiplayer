@@ -15,7 +15,16 @@ export class Player extends Component {
     speed = 4;
     attackInterval = 0.2;
     attackT = 0;
+    #colour;
     #hitsTaken = 0;
+
+    start() {
+        this.#colour = Network.owns(this.entity) ? 'rgb(0, 255, 0)' : 'rgb(255, 0, 0)';
+    }
+
+    networkStart() {
+        this.#colour = Network.owns(this.entity) ? 'rgb(0, 255, 0)' : 'rgb(255, 0, 0)';
+    }
 
     update() {
         if (!Network.owns(this.entity)) return;
@@ -86,14 +95,11 @@ export class Player extends Component {
     }
 
     render() {
-        // TODO: Network.owns needs to be checked after being received over Socket.IO, but every frame is excessive
-        const colour = Network.owns(this.entity) ? 'rgb(0, 255, 0)' : 'rgb(255, 0, 0)';
-
-        Renderer.render(2, Shape.Circle, colour, this.entity.position, this.size);
+        Renderer.render(2, Shape.Circle, this.#colour, this.entity.position, this.size);
         Renderer.render(
             4,
             Shape.Text,
-            colour,
+            this.#colour,
             this.#hitsTaken,
             new Vector2(this.entity.position.x, this.entity.position.y - this.size - 0.1)
         );

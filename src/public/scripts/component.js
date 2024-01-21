@@ -22,6 +22,8 @@ export class Component {
 
     start() {}
 
+    networkStart() {}
+
     update() {}
 
     render() {}

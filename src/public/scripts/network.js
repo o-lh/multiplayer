@@ -22,7 +22,12 @@ export class Network {
     static init() {
         this.#socket.on('create_entity', (serializedEntity) => {
             const entity = Game.addEntity(serializedEntity.id, serializedEntity.owner);
+
             this.#deserializeProperties(entity, serializedEntity, entity);
+
+            for (const component of entity.components) {
+                component.networkStart();
+            }
         });
 
         this.#socket.on('move_entity', (id, newPosition) => {
