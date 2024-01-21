@@ -7,7 +7,6 @@ import { Vector2 } from './vector2.js';
 
 export class Network {
     static #socket = io();
-    static #subscriptions = {};
 
     static #componentConstructors = { Projectile: Projectile, Player: Player, Health: Health };
     static #objectConstructors = { Vector2: Vector2 };
