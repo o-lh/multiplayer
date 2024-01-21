@@ -1,10 +1,11 @@
 import { Entity } from './entity.js';
+import { Health } from './components/health.js';
 import { Input } from './input.js';
 import { Network } from './network.js';
+import { Player } from './components/player.js';
 import { Renderer } from './renderer.js';
 import { Time } from './time.js';
 import { Vector2 } from './vector2.js';
-import { createPlayer } from './custom-entities/player-entity.js';
 import { createWall } from './custom-entities/wall.js';
 import { createWallAlternating } from './custom-entities/wall-alternating.js'
 import { createWallInvisible } from './custom-entities/wall-invisible.js';
@@ -63,14 +64,18 @@ export class Game {
             new Vector2(-Game.SCENE_SIZE.x / 2, -Game.SCENE_SIZE.y / 2)
         );
 
-        const player = createPlayer({
-            position: new Vector2(
-                (Math.random() * Game.SCENE_SIZE.x) - Game.SCENE_SIZE.x / 2,
-                (Math.random() * Game.SCENE_SIZE.y) - Game.SCENE_SIZE.y / 2
-            ),
-            healthMaximum: 100,
-            healthCurrent: 100
-        });
+        const player = Game.addEntity();
+        player.addTag('Player');
+        player.position = new Vector2(
+            (Math.random() * Game.SCENE_SIZE.x) - Game.SCENE_SIZE.x / 2,
+            (Math.random() * Game.SCENE_SIZE.y) - Game.SCENE_SIZE.y / 2
+        );
+    
+        player.addComponent(Player);
+    
+        const health = player.addComponent(Health);
+        health.maximum = 100;
+        health.current = 100;
 
         Network.emit('create_entity', player, true);
 
