@@ -2,6 +2,7 @@ import { Entity } from './entity.js';
 import { Health } from './components/health.js';
 import { Input } from './input.js';
 import { Network } from './network.js';
+import { PhysicsBody } from './components/physics-body.js';
 import { Player } from './components/player.js';
 import { Renderer } from './renderer.js';
 import { Time } from './time.js';
@@ -47,103 +48,44 @@ export class Game {
     }
 
     static #start() {
-        createWallInvisible(
-            new Vector2(-Game.SCENE_SIZE.x / 2, -Game.SCENE_SIZE.y / 2),
-            new Vector2(Game.SCENE_SIZE.x / 2, -Game.SCENE_SIZE.y / 2)
-        );
-        createWallInvisible(
-            new Vector2(Game.SCENE_SIZE.x / 2, -Game.SCENE_SIZE.y / 2),
-            new Vector2(Game.SCENE_SIZE.x / 2, Game.SCENE_SIZE.y / 2)
-        );
-        createWallInvisible(
-            new Vector2(Game.SCENE_SIZE.x / 2, Game.SCENE_SIZE.y / 2),
-            new Vector2(-Game.SCENE_SIZE.x / 2, Game.SCENE_SIZE.y / 2)
-        );
-        createWallInvisible(
-            new Vector2(-Game.SCENE_SIZE.x / 2, Game.SCENE_SIZE.y / 2),
-            new Vector2(-Game.SCENE_SIZE.x / 2, -Game.SCENE_SIZE.y / 2)
-        );
-
         const player = Game.addEntity();
         player.addTag('Player');
-        player.position = new Vector2(
-            (Math.random() * Game.SCENE_SIZE.x) - Game.SCENE_SIZE.x / 2,
-            (Math.random() * Game.SCENE_SIZE.y) - Game.SCENE_SIZE.y / 2
-        );
+
+        player.position = new Vector2(0, 0);
+
+        player.addComponent(PhysicsBody);
     
         player.addComponent(Player);
-    
-        const health = player.addComponent(Health);
-        health.maximum = 100;
-        health.current = 100;
 
         Network.emit('create_entity', player, true);
 
-        const unit = 10 / 3.5;
-
-        createWall(new Vector2(10-unit, -10), new Vector2(10-unit, -10+3*unit));
-        createWall(new Vector2(-10+unit, -10+unit), new Vector2(10-2*unit, -10+unit));
-        createWall(new Vector2(-10+2*unit, -10+2*unit), new Vector2(-10+2*unit, 10-2*unit));
-        createWall(new Vector2(10-2*unit, -10+2*unit), new Vector2(10-2*unit, 10-2*unit));
-        createWall(new Vector2(-10+unit, 0), new Vector2(-10+unit, 10-unit));
-        createWall(new Vector2(0, 10-2*unit), new Vector2(10-unit, 10-2*unit));
-        createWall(new Vector2(-10+2*unit, 10-unit), new Vector2(10-2*unit, 10-unit));
-
-        createWallAlternating(
-            new Vector2(-10+2*unit, -10+unit),
-            new Vector2(-10+2*unit, -10+2*unit),
-            false
-        );
-
-        createWallAlternating(
-            new Vector2(10-2*unit, -10+unit),
-            new Vector2(10-2*unit, -10+2*unit),
-            true
-        );
-
-        createWallAlternating(
-            new Vector2(10-2*unit, 10-2*unit),
-            new Vector2(10-2*unit, 10-unit),
-            false
-        );
-
-        createWallAlternating(
-            new Vector2(-10+2*unit, 10-2*unit),
-            new Vector2(-10+2*unit, 10-unit),
-            true
-        );
-
-        createWallAlternating(
-            new Vector2(10-2*unit, -10+unit),
-            new Vector2(10-unit, -10+unit),
-            false
-        );
-
-        createWallAlternating(
-            new Vector2(10-2*unit, -10+3*unit),
-            new Vector2(10-unit, -10+3*unit),
-            true
-        );
-
-        createWallAlternating(
-            new Vector2(-10+1*unit, 10-unit),
-            new Vector2(-10+2*unit, 10-unit),
-            false
-        );
-
-        createWallAlternating(
-            new Vector2(-10+1*unit, 0),
-            new Vector2(-10+2*unit, 0),
-            true
-        );
+        createWall(new Vector2(-10, -3), new Vector2(-9, 1));
+        createWall(new Vector2(-9, 1), new Vector2(-6, 2));
+        createWall(new Vector2(-6, 2), new Vector2(-4, 3));
+        createWall(new Vector2(-4, 3), new Vector2(-2, 2));
+        createWall(new Vector2(-2, 2), new Vector2(2, 2));
+        createWall(new Vector2(2, 2), new Vector2(4, 1));
+        createWall(new Vector2(4, 1), new Vector2(5, 1));
+        createWall(new Vector2(5, 1), new Vector2(6, 3));
+        createWall(new Vector2(6, 3), new Vector2(9, 5));
+        createWall(new Vector2(9, 5), new Vector2(10, 2));
 
         requestAnimationFrame(Game.#update);
     }
+
+    static throttle = 0;
 
     /**
      * @param {DOMHighResTimeStamp} time
      */
     static #update(time) {
+        // Game.throttle += 1;
+        // if (Game.throttle < 10) {
+        //     requestAnimationFrame(Game.#update);
+        //     return;
+        // }
+        // Game.throttle = 0;
+
         // TODO: Game.#updateTime(time);
         // TODO: google javascript singleton (does it just need an #initialised property?)
         Time.tick(time);
@@ -153,6 +95,7 @@ export class Game {
                 if (!component.enabled) continue;
 
                 component.update();
+                // TODO: What if this entity is destroyed later in the frame by another entity? Just do update and render loops separately
                 if (!entity.destroyed) component.render();
             }
         }
